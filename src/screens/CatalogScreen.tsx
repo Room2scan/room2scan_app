@@ -128,7 +128,7 @@ const CatalogList = ({
               activeOpacity={0.85}
               style={[styles.tab, activeCategory === cat.id ? styles.tabActive : styles.tabInactive]}
             >
-              <Text style={styles.tabIcon}>{cat.icon}</Text>
+              <EmojiText style={styles.tabIcon}>{cat.icon}</EmojiText>
               <Text style={[styles.tabLabel, activeCategory === cat.id ? styles.tabLabelActive : styles.tabLabelInactive]}>{cat.label}</Text>
             </TouchableOpacity>
           ))}
