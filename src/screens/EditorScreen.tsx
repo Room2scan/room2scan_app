@@ -21,8 +21,8 @@ export const EditorScreen = () => {
         <View style={styles.backWall} />
         <View style={styles.leftWall} />
         {[
-          { icon: 'home', left: '20%', top: '55%', bg: 'rgba(255,255,255,0.9)' },
-          { icon: 'grid', left: '55%', top: '45%', bg: 'rgba(255,255,255,0.8)' },
+          { icon: 'box', left: '20%', top: '55%', bg: 'rgba(255,255,255,0.9)' },
+          { icon: 'box', left: '55%', top: '45%', bg: 'rgba(255,255,255,0.8)' },
         ].map((item, i) => (
           <View key={i} style={[styles.sceneFurniture, { left: item.left as any, top: item.top as any, backgroundColor: item.bg }]}>
             <Feather name={item.icon as any} size={24} color="#4A3AFF" />

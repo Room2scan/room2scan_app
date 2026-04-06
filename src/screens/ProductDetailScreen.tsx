@@ -26,8 +26,8 @@ const REVIEW_DATA = [
   { id: 'rv3', author: '박준서', rating: 5, text: '퀄리티 대비 가격이 합리적이에요.' },
 ];
 const RECOMMENDED_ITEMS = [
-  { id: 'rec1', name: 'LACK Table', thumb: 'grid', price: '₩15,000', color: '#4A3AFF' },
-  { id: 'rec2', name: 'KALLAX Shelf', thumb: 'layers', price: '₩129,000', color: '#EAE8FF' },
+  { id: 'rec1', name: 'LACK Table', thumb: 'box', price: '₩15,000', color: '#4A3AFF' },
+  { id: 'rec2', name: 'KALLAX Shelf', thumb: 'box', price: '₩129,000', color: '#EAE8FF' },
   { id: 'rec3', name: 'POÄNG Chair', thumb: 'box', price: '₩179,000', color: '#897FFF' },
 ];
 const DETAIL_TABS = [{ id: 'specs' as const, label: '스펙' }, { id: 'materials' as const, label: '소재' }, { id: 'reviews' as const, label: '리뷰' }];
