@@ -9,7 +9,7 @@ import {
   Animated,
   Dimensions,
 } from 'react-native';
-import { Text } from '../components/Typography';
+import { Text, EmojiText } from '../components/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -196,7 +196,7 @@ export const HomeScreen = ({
                   style={styles.furnitureCard}
                 >
                   <View style={[styles.furnitureThumbnail, { backgroundColor: `${item.color}30` }]}>
-                    <Text style={styles.furnitureEmoji}>{item.thumbnail}</Text>
+                    <EmojiText style={styles.furnitureEmoji}>{item.thumbnail}</EmojiText>
                   </View>
                   <View>
                     <Text style={styles.furnitureName} numberOfLines={1}>{item.name}</Text>

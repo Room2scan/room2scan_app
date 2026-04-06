@@ -7,7 +7,7 @@ import {
   Animated,
   Dimensions,
 } from 'react-native';
-import { Text } from '../components/Typography';
+import { Text, EmojiText } from '../components/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -161,7 +161,7 @@ export const ProductDetailScreen = ({
           {/* Furniture preview */}
           <View style={styles.previewContent}>
             <View style={[styles.furnitureDisplay, { backgroundColor: `${selectedColor}25`, borderColor: `${accentColor}20` }]}>
-              <Text style={styles.furnitureEmoji}>{item.thumbnail}</Text>
+              <EmojiText style={styles.furnitureEmoji}>{item.thumbnail}</EmojiText>
             </View>
             {view3DActive && (
               <Animated.View style={[styles.rotateHint, { opacity: heroOpacity }]}>
@@ -328,7 +328,7 @@ export const ProductDetailScreen = ({
               {RECOMMENDED_ITEMS.map(rec => (
                 <View key={rec.id} style={styles.recCard}>
                   <View style={[styles.recImage, { backgroundColor: `${rec.color}20` }]}>
-                    <Text style={styles.recEmoji}>{rec.thumb}</Text>
+                    <EmojiText style={styles.recEmoji}>{rec.thumb}</EmojiText>
                   </View>
                   <Text style={styles.recName} numberOfLines={1}>{rec.name}</Text>
                   <Text style={[styles.recPrice, { color: accentColor }]}>{rec.price}</Text>

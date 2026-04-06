@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, StyleSheet, Animated, TouchableOpacity } from 'react-native';
-import { Text } from './src/components/Typography';
+import { Text, EmojiText } from './src/components/Typography';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -40,7 +40,7 @@ const EditorScreen = ({ onBack }: { onBack: () => void }) => {
           { emoji: '🧸', left: '55%', top: '45%', bg: 'rgba(255,255,255,0.8)' },
         ].map((item, i) => (
           <View key={i} style={[editorStyles.sceneFurniture, { left: item.left as any, top: item.top as any, backgroundColor: item.bg }]}>
-            <Text style={{ fontSize: 28 }}>{item.emoji}</Text>
+            <EmojiText style={{ fontSize: 28 }}>{item.emoji}</EmojiText>
           </View>
         ))}
         <Text style={editorStyles.sceneHint}>드래그하여 회전</Text>

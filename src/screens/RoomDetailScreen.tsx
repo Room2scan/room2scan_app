@@ -9,7 +9,7 @@ import {
   Dimensions,
   Modal,
 } from 'react-native';
-import { Text } from '../components/Typography';
+import { Text, EmojiText } from '../components/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -153,7 +153,7 @@ export const RoomDetailScreen = ({
               <View style={styles.mock3DGrid}>
                 {roomFurniture.slice(0, 3).map(item => (
                   <View key={item.id} style={styles.mock3DItem}>
-                    <Text style={styles.mock3DEmoji}>{item.thumbnail}</Text>
+                    <EmojiText style={styles.mock3DEmoji}>{item.thumbnail}</EmojiText>
                   </View>
                 ))}
               </View>
@@ -281,7 +281,7 @@ export const RoomDetailScreen = ({
                       },
                     ]}
                   >
-                    <Text style={styles.furnitureDotEmoji}>{item.thumbnail}</Text>
+                    <EmojiText style={styles.furnitureDotEmoji}>{item.thumbnail}</EmojiText>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -313,7 +313,7 @@ export const RoomDetailScreen = ({
                   ]}
                 >
                   <View style={styles.furnitureIcon}>
-                    <Text style={styles.furnitureEmoji}>{item.thumbnail}</Text>
+                    <EmojiText style={styles.furnitureEmoji}>{item.thumbnail}</EmojiText>
                   </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.furnitureName} numberOfLines={1}>{item.name}</Text>
@@ -371,7 +371,7 @@ export const RoomDetailScreen = ({
           {selectedItem && (
             <View style={styles.actionSheetHeader}>
               <View style={styles.actionSheetIcon}>
-                <Text style={{ fontSize: 24 }}>{selectedItem.thumbnail}</Text>
+                <EmojiText style={{ fontSize: 24 }}>{selectedItem.thumbnail}</EmojiText>
               </View>
               <View>
                 <Text style={styles.actionSheetName}>{selectedItem.name}</Text>
@@ -420,7 +420,7 @@ export const RoomDetailScreen = ({
               {ALL_FURNITURE.map(item => (
                 <TouchableOpacity key={item.id} onPress={() => addFurnitureToRoom(item)} style={styles.addFurnitureCard}>
                   <View style={styles.addFurnitureThumbnail}>
-                    <Text style={{ fontSize: 28 }}>{item.thumbnail}</Text>
+                    <EmojiText style={{ fontSize: 28 }}>{item.thumbnail}</EmojiText>
                   </View>
                   <Text style={styles.addFurnitureName} numberOfLines={1}>{item.name}</Text>
                   <Text style={styles.addFurnitureDim}>{item.dimensions}</Text>

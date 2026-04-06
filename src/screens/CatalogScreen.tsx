@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Animated,
 } from 'react-native';
-import { Text } from '../components/Typography';
+import { Text, EmojiText } from '../components/Typography';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomNav } from '../components/Shared';
@@ -180,7 +180,7 @@ const CatalogList = ({
               >
                 <View style={styles.cardImageWrap}>
                   <View style={[styles.cardImage, { backgroundColor: `${item.color}30` }]}>
-                    <Text style={styles.cardEmoji}>{item.thumbnail}</Text>
+                    <EmojiText style={styles.cardEmoji}>{item.thumbnail}</EmojiText>
                   </View>
                   {!item.isMyFurniture && (
                     <TouchableOpacity

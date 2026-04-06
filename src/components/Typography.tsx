@@ -21,3 +21,6 @@ export const Text = ({ style, ...props }: TextProps) => {
   const fontFamily = FONT_MAP[weight] ?? 'SUIT-Regular';
   return <RNText {...props} style={[{ fontFamily }, style]} />;
 };
+
+// 이모지 전용 — fontFamily 적용 안 함
+export const EmojiText = (props: TextProps) => <RNText {...props} />;
