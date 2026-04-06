@@ -13,26 +13,21 @@ import { Text, EmojiText } from '../components/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useSnack } from '../context/SnackbarContext';
 import { MY_ROOMS, ALL_FURNITURE } from '../data';
 import { RoomFurnitureItem, FurnitureItem, ViewMode } from '../types';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-interface RoomDetailScreenProps {
-  roomId: string;
-  onBack: () => void;
-  onOpenEditor: () => void;
-  onScanFurniture: () => void;
-  onSnack: (msg: string, icon?: string) => void;
-}
-
-export const RoomDetailScreen = ({
-  roomId,
-  onBack,
-  onOpenEditor,
-  onScanFurniture,
-  onSnack,
-}: RoomDetailScreenProps) => {
+export const RoomDetailScreen = () => {
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const roomId = route.params?.roomId ?? 'r1';
+  const { addSnack: onSnack } = useSnack();
+  const onBack = () => navigation.goBack();
+  const onOpenEditor = () => navigation.navigate('Editor');
+  const onScanFurniture = () => navigation.navigate('Camera', { mode: 'furniture' });
   const insets = useSafeAreaInsets();
   const room = MY_ROOMS.find(r => r.id === roomId) ?? MY_ROOMS[0];
   const [viewMode, setViewMode] = useState<ViewMode>('2d');

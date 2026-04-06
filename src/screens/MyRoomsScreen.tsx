@@ -9,17 +9,11 @@ import {
 import { Text } from '../components/Typography';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BottomNav } from '../components/Shared';
+import { useNavigation } from '@react-navigation/native';
 import { MY_ROOMS } from '../data';
-import { MainTab } from '../types';
 
-interface MyRoomsScreenProps {
-  onOpenRoom: (roomId: string) => void;
-  onAddRoom: () => void;
-  onTabChange: (t: MainTab) => void;
-}
-
-export const MyRoomsScreen = ({ onOpenRoom, onAddRoom, onTabChange }: MyRoomsScreenProps) => {
+export const MyRoomsScreen = () => {
+  const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   return (
     <View style={styles.container}>
@@ -34,7 +28,7 @@ export const MyRoomsScreen = ({ onOpenRoom, onAddRoom, onTabChange }: MyRoomsScr
           {MY_ROOMS.map(room => (
             <TouchableOpacity
               key={room.id}
-              onPress={() => onOpenRoom(room.id)}
+              onPress={() => navigation.navigate('RoomDetail', { roomId: room.id })}
               activeOpacity={0.9}
               style={styles.roomCard}
             >
@@ -92,13 +86,12 @@ export const MyRoomsScreen = ({ onOpenRoom, onAddRoom, onTabChange }: MyRoomsScr
 
       {/* FAB */}
       <View style={styles.fabContainer}>
-        <TouchableOpacity onPress={onAddRoom} activeOpacity={0.88} style={styles.fab}>
+        <TouchableOpacity onPress={() => navigation.navigate('Camera', { mode: 'room' })} activeOpacity={0.88} style={styles.fab}>
           <Feather name="plus" size={20} color="#fff" />
           <Text style={styles.fabText}>새 방 추가하기</Text>
         </TouchableOpacity>
       </View>
 
-      <BottomNav activeTab="rooms" onTabChange={onTabChange} />
     </View>
   );
 };

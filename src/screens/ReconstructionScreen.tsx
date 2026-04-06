@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import {
   View,
   StyleSheet,
@@ -173,11 +174,14 @@ const ProgressSteps = ({ currentPhase }: { currentPhase: ReconstructionPhase }) 
   );
 };
 
-interface ReconstructionScreenProps {
-  onComplete: () => void;
-}
-
-export const ReconstructionScreen = ({ onComplete }: ReconstructionScreenProps) => {
+export const ReconstructionScreen = () => {
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const mode = route.params?.mode ?? 'room';
+  const onComplete = () => {
+    if (mode === 'furniture') navigation.navigate('Main', { screen: 'catalog' });
+    else navigation.navigate('Editor');
+  };
   const [currentPhase, setCurrentPhase] = useState<ReconstructionPhase>('frames');
   const [progress, setProgress] = useState(0);
   const phaseIndexRef = useRef(0);

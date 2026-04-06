@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   ScrollView,
@@ -6,35 +6,32 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  Animated,
   Dimensions,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
 import { Text, EmojiText } from '../components/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BottomNav } from '../components/Shared';
+import { useNavigation } from '@react-navigation/native';
+import { useSnack } from '../context/SnackbarContext';
 import { HERO_BANNERS, MY_ROOMS, POPULAR_FURNITURE } from '../data';
-import { MainTab } from '../types';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-interface HomeScreenProps {
-  onAddRoom: () => void;
-  onOpenRoom: (roomId: string) => void;
-  onTabChange: (t: MainTab) => void;
-  onSnack: (msg: string, icon?: string) => void;
-}
-
-export const HomeScreen = ({
-  onAddRoom,
-  onOpenRoom,
-  onTabChange,
-  onSnack,
-}: HomeScreenProps) => {
+export const HomeScreen = () => {
+  const navigation = useNavigation<any>();
+  const { addSnack } = useSnack();
   const insets = useSafeAreaInsets();
   const [activeBanner, setActiveBanner] = useState(0);
-  const scrollY = useRef(new Animated.Value(0)).current;
 
   const BANNER_HEIGHT = Math.round(SCREEN_HEIGHT * 0.52);
   const SHEET_OVERLAP = 28;
@@ -46,12 +43,33 @@ export const HomeScreen = ({
     return () => clearInterval(t);
   }, []);
 
-  const bannerHeight = scrollY.interpolate({ inputRange: [0, MAX_SCROLL], outputRange: [BANNER_HEIGHT, MIN_BANNER + SHEET_OVERLAP], extrapolate: 'clamp' });
-  const bannerOpacity = scrollY.interpolate({ inputRange: [0, MAX_SCROLL * 0.625], outputRange: [1, 0], extrapolate: 'clamp' });
-  const bannerScale = scrollY.interpolate({ inputRange: [0, MAX_SCROLL], outputRange: [1, 0.97], extrapolate: 'clamp' });
-  const sheetBorderRadius = scrollY.interpolate({ inputRange: [0, MAX_SCROLL], outputRange: [28, 0], extrapolate: 'clamp' });
-  const headerBgOpacity = scrollY.interpolate({ inputRange: [MAX_SCROLL * 0.6, MAX_SCROLL], outputRange: [0, 1], extrapolate: 'clamp' });
-  const titleOpacity = scrollY.interpolate({ inputRange: [MAX_SCROLL * 0.5, MAX_SCROLL], outputRange: [0, 1], extrapolate: 'clamp' });
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler(e => {
+    'worklet';
+    scrollY.value = e.contentOffset.y;
+  });
+
+  const bannerHeightStyle = useAnimatedStyle(() => ({
+    height: interpolate(scrollY.value, [0, MAX_SCROLL], [BANNER_HEIGHT, MIN_BANNER + SHEET_OVERLAP], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(scrollY.value, [0, MAX_SCROLL], [1, 0.97], Extrapolation.CLAMP) }],
+  }));
+
+  const bannerOpacityStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [0, MAX_SCROLL * 0.625], [1, 0], Extrapolation.CLAMP),
+  }));
+
+  const sheetRadiusStyle = useAnimatedStyle(() => ({
+    borderTopLeftRadius: interpolate(scrollY.value, [0, MAX_SCROLL], [28, 0], Extrapolation.CLAMP),
+    borderTopRightRadius: interpolate(scrollY.value, [0, MAX_SCROLL], [28, 0], Extrapolation.CLAMP),
+  }));
+
+  const headerBgStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [MAX_SCROLL * 0.6, MAX_SCROLL], [0, 1], Extrapolation.CLAMP),
+  }));
+
+  const titleStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [MAX_SCROLL * 0.5, MAX_SCROLL], [0, 1], Extrapolation.CLAMP),
+  }));
 
   const activeBannerData = HERO_BANNERS[activeBanner];
 
@@ -59,8 +77,10 @@ export const HomeScreen = ({
     <View style={styles.container}>
       {/* Fixed top bar */}
       <Animated.View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
-        <Animated.View style={{ backgroundColor: 'rgba(251,251,254,1)', ...StyleSheet.absoluteFillObject, opacity: headerBgOpacity }} />
-        <Animated.Text style={[styles.feedTitle, { opacity: titleOpacity }]}>Feed</Animated.Text>
+        <Animated.View style={[StyleSheet.absoluteFillObject, styles.headerBg, headerBgStyle]} />
+        <Animated.View style={titleStyle}>
+          <Text style={styles.feedTitle}>Feed</Text>
+        </Animated.View>
         <View style={styles.topBarRight}>
           <TouchableOpacity style={styles.bellBtn} activeOpacity={0.8}>
             <Feather name="bell" size={16} color="#514F6E" />
@@ -72,7 +92,7 @@ export const HomeScreen = ({
       </Animated.View>
 
       {/* Hero banner */}
-      <Animated.View style={[styles.heroBanner, { height: bannerHeight, transform: [{ scale: bannerScale }] }]}>
+      <Animated.View style={[styles.heroBanner, bannerHeightStyle]}>
         {HERO_BANNERS.map((banner, idx) => (
           <Animated.View
             key={banner.id}
@@ -86,14 +106,10 @@ export const HomeScreen = ({
             />
           </Animated.View>
         ))}
-
-        {/* Brand label */}
-        <Animated.View style={[styles.brandLabel, { top: insets.top + 14, opacity: bannerOpacity }]}>
+        <Animated.View style={[styles.brandLabel, { top: insets.top + 14 }, bannerOpacityStyle]}>
           <Text style={styles.brandText}>Scan2Room</Text>
         </Animated.View>
-
-        {/* Banner content */}
-        <Animated.View style={[styles.bannerContent, { opacity: bannerOpacity }]}>
+        <Animated.View style={[styles.bannerContent, bannerOpacityStyle]}>
           <View style={styles.bannerTag}>
             <View style={styles.bannerDot} />
             <Text style={styles.bannerTagText}>{activeBannerData.label}</Text>
@@ -101,9 +117,7 @@ export const HomeScreen = ({
           <Text style={styles.bannerHeadline}>{activeBannerData.headline}</Text>
           <Text style={styles.bannerSubtext}>{activeBannerData.subtext}</Text>
         </Animated.View>
-
-        {/* Dots */}
-        <Animated.View style={[styles.bannerDots, { opacity: bannerOpacity }]}>
+        <Animated.View style={[styles.bannerDots, bannerOpacityStyle]}>
           {HERO_BANNERS.map((b, i) => (
             <TouchableOpacity
               key={b.id}
@@ -118,44 +132,46 @@ export const HomeScreen = ({
       <Animated.ScrollView
         style={StyleSheet.absoluteFillObject}
         contentContainerStyle={{ paddingTop: BANNER_HEIGHT - SHEET_OVERLAP }}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
+        onScroll={scrollHandler}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <Animated.View style={[styles.sheet, { borderTopLeftRadius: sheetBorderRadius, borderTopRightRadius: sheetBorderRadius }]}>
+        <Animated.View style={[styles.sheet, sheetRadiusStyle]}>
           {/* Search */}
-          <View style={styles.searchRow}>
-            <View style={styles.searchBox}>
-              <Feather name="search" size={15} color="#A0A3BD" />
-              <TextInput
-                placeholder="가구 또는 방 검색..."
-                placeholderTextColor="#A0A3BD"
-                style={styles.searchInput}
-              />
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <View style={styles.searchRow}>
+              <View style={styles.searchBox}>
+                <Feather name="search" size={15} color="#A0A3BD" />
+                <TextInput
+                  placeholder="가구 또는 방 검색..."
+                  placeholderTextColor="#A0A3BD"
+                  style={styles.searchInput}
+                  returnKeyType="search"
+                />
+              </View>
             </View>
-          </View>
+          </KeyboardAvoidingView>
 
           {/* My Rooms */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>내 방 목록</Text>
-              <TouchableOpacity onPress={() => onTabChange('rooms')} style={styles.seeAll}>
+              <TouchableOpacity onPress={() => navigation.navigate('rooms')} style={styles.seeAll}>
                 <Text style={styles.seeAllText}>전체 보기</Text>
                 <Feather name="chevron-right" size={13} color="#4A3AFF" />
               </TouchableOpacity>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll} contentContainerStyle={styles.hScrollContent}>
-              {/* Add room button */}
-              <TouchableOpacity onPress={onAddRoom} activeOpacity={0.8} style={styles.addRoomCard}>
+              <TouchableOpacity onPress={() => navigation.navigate('Camera', { mode: 'room' })} activeOpacity={0.8} style={styles.addRoomCard}>
                 <View style={styles.addRoomIcon}>
                   <Feather name="plus" size={18} color="#4A3AFF" />
                 </View>
                 <Text style={styles.addRoomTitle}>방 추가</Text>
                 <Text style={styles.addRoomSub}>촬영해서 추가</Text>
               </TouchableOpacity>
-
               {MY_ROOMS.map(room => (
-                <TouchableOpacity key={room.id} onPress={() => onOpenRoom(room.id)} activeOpacity={0.85} style={styles.roomCard}>
+                <TouchableOpacity key={room.id} onPress={() => navigation.navigate('RoomDetail', { roomId: room.id })} activeOpacity={0.85} style={styles.roomCard}>
                   <View style={styles.roomCardImage}>
                     <Image source={{ uri: room.heroImage }} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
                     <LinearGradient colors={['transparent', 'rgba(0,0,0,0.5)']} style={StyleSheet.absoluteFillObject} />
@@ -182,7 +198,7 @@ export const HomeScreen = ({
                 <Feather name="trending-up" size={15} color="#4A3AFF" />
                 <Text style={styles.sectionTitle}>지금 트렌드</Text>
               </View>
-              <TouchableOpacity onPress={() => onTabChange('catalog')} style={styles.seeAll}>
+              <TouchableOpacity onPress={() => navigation.navigate('catalog')} style={styles.seeAll}>
                 <Text style={styles.seeAllText}>전체 보기</Text>
                 <Feather name="chevron-right" size={13} color="#4A3AFF" />
               </TouchableOpacity>
@@ -191,7 +207,7 @@ export const HomeScreen = ({
               {POPULAR_FURNITURE.map(item => (
                 <TouchableOpacity
                   key={item.id}
-                  onPress={() => onSnack(`${item.name} 상세 보기`, item.thumbnail)}
+                  onPress={() => addSnack(`${item.name} 상세 보기`, item.thumbnail)}
                   activeOpacity={0.85}
                   style={styles.furnitureCard}
                 >
@@ -215,8 +231,6 @@ export const HomeScreen = ({
           </View>
         </Animated.View>
       </Animated.ScrollView>
-
-      <BottomNav activeTab="home" onTabChange={onTabChange} />
     </View>
   );
 };
@@ -228,6 +242,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12, paddingHorizontal: 20,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
   },
+  headerBg: { backgroundColor: 'rgba(251,251,254,1)' },
   feedTitle: { fontSize: 18, fontWeight: '700', color: '#170F49' },
   topBarRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   bellBtn: {
@@ -242,11 +257,8 @@ const styles = StyleSheet.create({
     shadowColor: '#897FFF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 6, elevation: 4,
   },
   avatarText: { color: '#fff', fontSize: 12, fontWeight: '700' },
-  heroBanner: {
-    position: 'absolute', top: 0, left: 0, right: 0,
-    overflow: 'hidden', transformOrigin: 'top center',
-  },
-  bannerSlide: { position: 'absolute', inset: 0, top: 0, left: 0, right: 0, bottom: 0 },
+  heroBanner: { position: 'absolute', top: 0, left: 0, right: 0, overflow: 'hidden' },
+  bannerSlide: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   bannerImage: { width: '100%', height: '100%' },
   brandLabel: { position: 'absolute', left: 20, zIndex: 10 },
   brandText: { color: '#fff', fontWeight: '700', fontSize: 15, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },

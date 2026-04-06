@@ -9,22 +9,15 @@ import {
 import { Text, EmojiText } from '../components/Typography';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BottomNav } from '../components/Shared';
 import { ProductDetailScreen } from './ProductDetailScreen';
 import { ALL_FURNITURE, CATEGORY_TABS } from '../data';
-import { MainTab, FurnitureItem, CatalogCategory } from '../types';
+import { FurnitureItem, CatalogCategory } from '../types';
+import { useNavigation } from '@react-navigation/native';
+import { useSnack } from '../context/SnackbarContext';
 
-interface CatalogFlowContainerProps {
-  onAddMyFurniture: () => void;
-  onTabChange: (t: MainTab) => void;
-  onSnack: (msg: string, icon?: string) => void;
-}
-
-export const CatalogFlowContainer = ({
-  onAddMyFurniture,
-  onTabChange,
-  onSnack,
-}: CatalogFlowContainerProps) => {
+export const CatalogFlowContainer = () => {
+  const navigation = useNavigation<any>();
+  const { addSnack: onSnack } = useSnack();
   const [flow, setFlow] = useState<'list' | 'detail'>('list');
   const [selectedItem, setSelectedItem] = useState<FurnitureItem | null>(null);
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(
@@ -75,8 +68,7 @@ export const CatalogFlowContainer = ({
   return (
     <CatalogList
       wishlistIds={wishlistIds}
-      onAddMyFurniture={onAddMyFurniture}
-      onTabChange={onTabChange}
+      onAddMyFurniture={() => navigation.navigate('Camera', { mode: 'furniture' })}
       onSnack={onSnack}
       onOpenProduct={handleOpenProduct}
       onToggleWishlist={handleToggleWishlist}
@@ -87,7 +79,6 @@ export const CatalogFlowContainer = ({
 interface CatalogListProps {
   wishlistIds: Set<string>;
   onAddMyFurniture: () => void;
-  onTabChange: (t: MainTab) => void;
   onSnack: (msg: string, icon?: string) => void;
   onOpenProduct: (item: FurnitureItem) => void;
   onToggleWishlist: (id: string) => void;
@@ -96,7 +87,6 @@ interface CatalogListProps {
 const CatalogList = ({
   wishlistIds,
   onAddMyFurniture,
-  onTabChange,
   onSnack,
   onOpenProduct,
   onToggleWishlist,
@@ -217,7 +207,6 @@ const CatalogList = ({
         )}
       </ScrollView>
 
-      <BottomNav activeTab="catalog" onTabChange={onTabChange} />
     </View>
   );
 };

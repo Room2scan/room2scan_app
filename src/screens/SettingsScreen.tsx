@@ -3,14 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '../components/Typography';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BottomNav } from '../components/Shared';
-import { MainTab } from '../types';
-
-interface SettingsScreenProps {
-  onTabChange: (t: MainTab) => void;
-}
-
-export const SettingsScreen = ({ onTabChange }: SettingsScreenProps) => {
+export const SettingsScreen = () => {
   const insets = useSafeAreaInsets();
   return (
     <View style={styles.container}>
@@ -27,7 +20,6 @@ export const SettingsScreen = ({ onTabChange }: SettingsScreenProps) => {
         </View>
       </View>
 
-      <BottomNav activeTab="settings" onTabChange={onTabChange} />
     </View>
   );
 };

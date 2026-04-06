@@ -13,15 +13,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useNavigation, useRoute } from '@react-navigation/native';
+
 type ScanPhase = 'idle' | 'scanning' | 'complete';
 type WarningType = 'tooFast' | 'offPath' | 'notLevel' | null;
 type CameraMode = 'room' | 'furniture';
-
-interface PanoramaCameraScreenProps {
-  onProcess: () => void;
-  onBack: () => void;
-  mode?: CameraMode;
-}
 
 const SCAN_STEPS = ['왼쪽 벽', '중앙', '오른쪽 벽', '천장'];
 const FRAME_COLORS: [string, string][] = [
@@ -41,11 +37,12 @@ const MODE_LABELS: Record<CameraMode, { title: string; instruction: string; subI
   furniture: { title: '가구 스캔', instruction: '가구 주변을 천천히 돌며 촬영하세요', subInstruction: '360° 전체가 포착되도록' },
 };
 
-export const PanoramaCameraScreen = ({
-  onProcess,
-  onBack,
-  mode = 'room',
-}: PanoramaCameraScreenProps) => {
+export const PanoramaCameraScreen = () => {
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const mode: CameraMode = route.params?.mode ?? 'room';
+  const onProcess = () => navigation.navigate('Processing', { mode });
+  const onBack = () => navigation.goBack();
   const insets = useSafeAreaInsets();
   const [scanPhase, setScanPhase] = useState<ScanPhase>('idle');
   const [progress, setProgress] = useState(0);
