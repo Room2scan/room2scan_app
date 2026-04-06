@@ -1,12 +1,12 @@
 import React from 'react';
 import {
   View,
-  Text,
   ScrollView,
   Image,
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { Text } from '../components/Typography';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomNav } from '../components/Shared';

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Animated,
   Easing,
 } from 'react-native';
+import { Text } from '../components/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Line, Rect, G } from 'react-native-svg';
 
