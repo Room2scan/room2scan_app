@@ -24,7 +24,6 @@ const TabBarWrapper = ({ navigation, state }: BottomTabBarProps) => {
     <BottomNav
       activeTab={activeTab}
       onTabChange={(tab) => navigation.navigate(tab as any)}
-      onScan={() => navigation.getParent()?.navigate('Camera', { mode: 'room' })}
     />
   );
 };

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   TouchableOpacity,
   StyleSheet,
+  Animated,
+  Platform,
 } from 'react-native';
 import { Text } from './Typography';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -60,89 +62,72 @@ type NavTab = {
 };
 
 const NAV_TABS: NavTab[] = [
-  { id: 'home',     featherIcon: 'home',     label: '홈' },
-  { id: 'rooms',    featherIcon: 'box',      label: '내 방' },
-  { id: 'catalog',  mciIcon: 'sofa-outline', label: '카탈로그' },
+  { id: 'home', featherIcon: 'home', label: '홈' },
+  { id: 'rooms', featherIcon: 'box', label: '내 방' },
+  { id: 'catalog', mciIcon: 'sofa-outline', label: '카탈로그' },
   { id: 'settings', featherIcon: 'settings', label: '설정' },
 ];
-
-const LEFT_TABS  = NAV_TABS.slice(0, 2);
-const RIGHT_TABS = NAV_TABS.slice(2);
-
-const TabIcon = ({ tab, color, size }: { tab: NavTab; color: string; size: number }) =>
-  tab.featherIcon
-    ? <Feather name={tab.featherIcon as any} size={size} color={color} />
-    : <MaterialCommunityIcons name={tab.mciIcon as any} size={size} color={color} />;
 
 export const BottomNav = ({
   activeTab,
   onTabChange,
-  onScan,
 }: {
   activeTab: MainTab;
   onTabChange: (t: MainTab) => void;
-  onScan?: () => void;
 }) => {
   const insets = useSafeAreaInsets();
-
-  const renderTab = (tab: NavTab) => {
-    const isActive = activeTab === tab.id;
-    return (
-      <TouchableOpacity
-        key={tab.id}
-        onPress={() => onTabChange(tab.id)}
-        activeOpacity={0.75}
-        style={styles.tabTouch}
-      >
-        {isActive ? (
-          <View style={styles.activeTab}>
-            <TabIcon tab={tab} color="#170F49" size={20} />
-            <Text style={styles.activeTabLabel}>{tab.label}</Text>
-          </View>
-        ) : (
-          <View style={styles.inactiveTab}>
-            <TabIcon tab={tab} color="rgba(255,255,255,0.55)" size={20} />
-            <Text style={styles.inactiveTabLabel}>{tab.label}</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-    );
-  };
+  const bottomPad = Math.max(insets.bottom, 8) + 8;
 
   return (
     <View
-      style={[styles.outer, { paddingBottom: Math.max(insets.bottom, 8) + 8 }]}
+      style={[styles.bottomNavOuter, { paddingBottom: bottomPad }]}
       pointerEvents="box-none"
     >
-      {/* Shadow wrapper — no overflow:hidden so shadow is visible */}
-      <View style={styles.pillShadow}>
-        {/* Clip wrapper — overflow:hidden for BlurView */}
-        <View style={styles.pill}>
-          <BlurView intensity={55} tint="dark" style={StyleSheet.absoluteFillObject} />
-          <View style={styles.pillOverlay} />
-
-          {/* Content row */}
-          <View style={styles.pillContent}>
-            {LEFT_TABS.map(renderTab)}
-
-            {/* Center scan button */}
-            <TouchableOpacity
-              onPress={onScan}
-              activeOpacity={0.85}
-              style={styles.scanTouch}
-            >
-              <LinearGradient
-                colors={['#7B6FFF', '#4A3AFF']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.scanBtn}
+      <LinearGradient
+        colors={['rgba(251,251,254,0)', 'rgba(251,251,254,0.98)']}
+        style={StyleSheet.absoluteFillObject}
+        pointerEvents="none"
+      />
+      <View style={styles.bottomNavWrapper} pointerEvents="box-none">
+        <View style={styles.bottomNavInner}>
+          {NAV_TABS.map(tab => {
+            const isActive = activeTab === tab.id;
+            const iconColor = isActive ? '#fff' : '#A0A3BD';
+            const iconSize = isActive ? 17 : 20;
+            return (
+              <TouchableOpacity
+                key={tab.id}
+                onPress={() => onTabChange(tab.id)}
+                activeOpacity={0.8}
+                style={styles.navTabBtn}
               >
-                <Feather name="camera" size={22} color="#fff" />
-              </LinearGradient>
-            </TouchableOpacity>
-
-            {RIGHT_TABS.map(renderTab)}
-          </View>
+                {isActive ? (
+                  <LinearGradient
+                    colors={['#4A3AFF', '#7B6FFF']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.navActivePill}
+                  >
+                    {tab.featherIcon ? (
+                      <Feather name={tab.featherIcon as any} size={iconSize} color={iconColor} />
+                    ) : (
+                      <MaterialCommunityIcons name={tab.mciIcon as any} size={iconSize} color={iconColor} />
+                    )}
+                    <Text style={styles.navActiveLabel}>{tab.label}</Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.navInactiveItem}>
+                    {tab.featherIcon ? (
+                      <Feather name={tab.featherIcon as any} size={iconSize} color={iconColor} />
+                    ) : (
+                      <MaterialCommunityIcons name={tab.mciIcon as any} size={iconSize} color={iconColor} />
+                    )}
+                    <Text style={styles.navInactiveLabel}>{tab.label}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
     </View>
@@ -156,7 +141,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.40)',
   },
-  glassCardBlur: {},
+  glassCardBlur: {
+    // content goes here
+  },
   snackbarContainer: {
     position: 'absolute',
     bottom: 144,
@@ -180,87 +167,77 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
   },
+  snackbarIcon: {
+    fontSize: 16,
+  },
   snackbarText: {
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
-
-  // ── Nav layout ──
-  outer: {
+  bottomNavOuter: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     alignItems: 'center',
+    paddingTop: 12,
     zIndex: 20,
   },
-  pillShadow: {
-    borderRadius: 999,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.40,
-    shadowRadius: 28,
-    elevation: 16,
+  bottomNavWrapper: {
+    alignItems: 'center',
   },
-  pill: {
-    borderRadius: 999,
-    overflow: 'hidden',
-    borderWidth: 0.5,
-    borderColor: 'rgba(255,255,255,0.16)',
-  },
-  pillOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(8,6,22,0.68)',
-    borderRadius: 999,
-  },
-  pillContent: {
+  bottomNavInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 2,
-  },
-
-  // ── Tab items ──
-  tabTouch: {
-    borderRadius: 999,
-  },
-  activeTab: {
-    backgroundColor: '#fff',
-    borderRadius: 999,
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    alignItems: 'center',
     gap: 4,
-  },
-  activeTabLabel: {
-    color: '#170F49',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  inactiveTab: {
-    alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 8,
     paddingVertical: 8,
-    gap: 4,
-  },
-  inactiveTabLabel: {
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: 10,
-    fontWeight: '500',
-  },
-
-  // ── Center scan button ──
-  scanTouch: {
     borderRadius: 999,
-    marginHorizontal: 6,
+    backgroundColor: 'rgba(255,255,255,0.70)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.72)',
+    shadowColor: '#4A3AFF',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.09,
+    shadowRadius: 16,
+    elevation: 6,
   },
-  scanBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+  navTabBtn: {
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  navActivePill: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#4A3AFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.32,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  navActiveLabel: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 10,
+  },
+  navInactiveItem: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    minWidth: 52,
+  },
+  navInactiveLabel: {
+    color: '#A0A3BD',
+    fontWeight: '500',
+    fontSize: 10,
   },
 });
