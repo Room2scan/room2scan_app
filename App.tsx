@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
+import * as Font from 'expo-font';
 
 import { HomeScreen } from './src/screens/HomeScreen';
 import { MyRoomsScreen } from './src/screens/MyRoomsScreen';
@@ -140,11 +141,24 @@ const editorStyles = StyleSheet.create({
 // ─── Root App ─────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
   const [appState, setAppState] = useState<AppState>('home');
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [selectedRoomId, setSelectedRoomId] = useState<string>('r1');
   const [cameraMode, setCameraMode] = useState<'room' | 'furniture'>('room');
   const [snacks, setSnacks] = useState<SnackbarItem[]>([]);
+
+  useEffect(() => {
+    Font.loadAsync({
+      'SUIT-Regular':   require('./assets/fonts/SUITv1-Regular.ttf'),
+      'SUIT-Medium':    require('./assets/fonts/SUITv1-Medium.ttf'),
+      'SUIT-SemiBold':  require('./assets/fonts/SUITv1-SemiBold.ttf'),
+      'SUIT-Bold':      require('./assets/fonts/SUITv1-Bold.ttf'),
+      'SUIT-ExtraBold': require('./assets/fonts/SUITv1-ExtraBold.ttf'),
+    }).then(() => setFontsLoaded(true)).catch(() => setFontsLoaded(true));
+  }, []);
+
+  if (!fontsLoaded) return null;
 
   const addSnack = useCallback((message: string, icon?: string) => {
     const id = `snack_${Date.now()}_${Math.random()}`;
