@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { Text } from './Typography';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -79,12 +80,16 @@ export const BottomNav = ({
       style={[styles.navOuter, { paddingBottom: Math.max(insets.bottom, 8) + 8 }]}
       pointerEvents="box-none"
     >
+      {/* Glass pill — blur + dark overlay */}
       <View style={styles.navPill}>
+        <BlurView intensity={70} tint="dark" style={StyleSheet.absoluteFillObject} />
+        <View style={styles.navPillOverlay} />
+
         {NAV_TABS.map(tab => {
           const isActive = activeTab === tab.id;
           const icon = tab.featherIcon
-            ? <Feather name={tab.featherIcon as any} size={24} color={isActive ? '#000' : 'rgba(255,255,255,0.6)'} />
-            : <MaterialCommunityIcons name={tab.mciIcon as any} size={24} color={isActive ? '#000' : 'rgba(255,255,255,0.6)'} />;
+            ? <Feather name={tab.featherIcon as any} size={24} color="#fff" />
+            : <MaterialCommunityIcons name={tab.mciIcon as any} size={24} color="#fff" />;
           return (
             <TouchableOpacity
               key={tab.id}
@@ -166,40 +171,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    backgroundColor: '#000',
     borderRadius: 100,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    overflow: 'hidden',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.30,
     shadowRadius: 20,
     elevation: 12,
+  },
+  navPillOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(20,18,40,0.55)',
   },
   navTabBtn: {
     flex: 1,
     alignItems: 'center',
   },
   navActiveTab: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.22)',
     borderRadius: 100,
     paddingHorizontal: 20,
     paddingVertical: 8,
     alignItems: 'center',
     gap: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.30)',
   },
   navActiveLabel: {
-    color: '#000',
+    color: '#fff',
     fontWeight: '600',
     fontSize: 12,
   },
   navInactiveTab: {
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 8,
     gap: 3,
   },
   navInactiveLabel: {
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(255,255,255,0.55)',
     fontWeight: '500',
     fontSize: 12,
   },
