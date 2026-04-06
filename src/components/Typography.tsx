@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text as RNText, TextProps, StyleSheet } from 'react-native';
+import { Text as RNText, TextProps, StyleSheet, Platform } from 'react-native';
 
 const FONT_MAP: Record<string, string> = {
   '100': 'SUIT-Regular',
@@ -22,5 +22,8 @@ export const Text = ({ style, ...props }: TextProps) => {
   return <RNText {...props} style={[{ fontFamily }, style]} />;
 };
 
-// 이모지 전용 — fontFamily 적용 안 함
-export const EmojiText = (props: TextProps) => <RNText {...props} />;
+// 이모지 전용 — SUIT 폰트 상속 차단, 시스템 폰트 강제 적용
+const EMOJI_FONT = Platform.OS === 'ios' ? 'AppleColorEmoji' : 'sans-serif';
+export const EmojiText = ({ style, ...props }: TextProps) => (
+  <RNText {...props} style={[{ fontFamily: EMOJI_FONT }, style, { fontFamily: EMOJI_FONT }]} />
+);
