@@ -122,6 +122,7 @@ export const BottomNav = ({
                     ) : (
                       <MaterialCommunityIcons name={tab.mciIcon as any} size={iconSize} color={iconColor} />
                     )}
+                    <Text style={styles.navInactiveLabel}>{tab.label}</Text>
                   </View>
                 )}
               </TouchableOpacity>
@@ -208,12 +209,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   navActivePill: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
-    gap: 6,
+    gap: 3,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 999,
+    paddingVertical: 8,
+    borderRadius: 20,
     shadowColor: '#4A3AFF',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.32,
@@ -223,13 +224,20 @@ const styles = StyleSheet.create({
   navActiveLabel: {
     color: '#fff',
     fontWeight: '700',
-    fontSize: 12,
+    fontSize: 10,
   },
   navInactiveItem: {
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 3,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 8,
     minWidth: 52,
+  },
+  navInactiveLabel: {
+    color: '#A0A3BD',
+    fontWeight: '500',
+    fontSize: 10,
   },
 });
