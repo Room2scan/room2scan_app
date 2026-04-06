@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 
+import { SplashScreen } from './src/screens/SplashScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { MyRoomsScreen } from './src/screens/MyRoomsScreen';
 import { CatalogFlowContainer } from './src/screens/CatalogScreen';
@@ -143,6 +144,7 @@ const editorStyles = StyleSheet.create({
 
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const [appState, setAppState] = useState<AppState>('home');
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [selectedRoomId, setSelectedRoomId] = useState<string>('r1');
@@ -166,6 +168,15 @@ export default function App() {
   }, []);
 
   if (!fontsLoaded) return null;
+
+  if (showSplash) {
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <SplashScreen onFinish={() => setShowSplash(false)} />
+      </SafeAreaProvider>
+    );
+  }
 
   const goHome = () => { setAppState('home'); setActiveTab('home'); };
   const goCamera = (mode: 'room' | 'furniture' = 'room') => { setCameraMode(mode); setAppState('camera'); };
