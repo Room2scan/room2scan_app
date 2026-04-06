@@ -148,6 +148,12 @@ export default function App() {
   const [cameraMode, setCameraMode] = useState<'room' | 'furniture'>('room');
   const [snacks, setSnacks] = useState<SnackbarItem[]>([]);
 
+  const addSnack = useCallback((message: string, icon?: string) => {
+    const id = `snack_${Date.now()}_${Math.random()}`;
+    setSnacks(prev => [...prev.slice(-2), { id, message, icon }]);
+    setTimeout(() => setSnacks(prev => prev.filter(s => s.id !== id)), 2800);
+  }, []);
+
   useEffect(() => {
     Font.loadAsync({
       'SUIT-Regular':   require('./assets/fonts/SUITv1-Regular.ttf'),
@@ -159,12 +165,6 @@ export default function App() {
   }, []);
 
   if (!fontsLoaded) return null;
-
-  const addSnack = useCallback((message: string, icon?: string) => {
-    const id = `snack_${Date.now()}_${Math.random()}`;
-    setSnacks(prev => [...prev.slice(-2), { id, message, icon }]);
-    setTimeout(() => setSnacks(prev => prev.filter(s => s.id !== id)), 2800);
-  }, []);
 
   const goHome = () => { setAppState('home'); setActiveTab('home'); };
   const goCamera = (mode: 'room' | 'furniture' = 'room') => { setCameraMode(mode); setAppState('camera'); };
