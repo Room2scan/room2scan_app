@@ -1,13 +1,10 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Animated,
-  Platform,
 } from 'react-native';
 import { Text } from './Typography';
-import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Feather } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -76,59 +73,39 @@ export const BottomNav = ({
   onTabChange: (t: MainTab) => void;
 }) => {
   const insets = useSafeAreaInsets();
-  const bottomPad = Math.max(insets.bottom, 8) + 8;
 
   return (
     <View
-      style={[styles.bottomNavOuter, { paddingBottom: bottomPad }]}
+      style={[styles.navOuter, { paddingBottom: Math.max(insets.bottom, 8) + 8 }]}
       pointerEvents="box-none"
     >
-      <LinearGradient
-        colors={['rgba(251,251,254,0)', 'rgba(251,251,254,0.98)']}
-        style={StyleSheet.absoluteFillObject}
-        pointerEvents="none"
-      />
-      <View style={styles.bottomNavWrapper} pointerEvents="box-none">
-        <View style={styles.bottomNavInner}>
-          {NAV_TABS.map(tab => {
-            const isActive = activeTab === tab.id;
-            const iconColor = isActive ? '#fff' : '#A0A3BD';
-            const iconSize = isActive ? 17 : 20;
-            return (
-              <TouchableOpacity
-                key={tab.id}
-                onPress={() => onTabChange(tab.id)}
-                activeOpacity={0.8}
-                style={styles.navTabBtn}
-              >
-                {isActive ? (
-                  <LinearGradient
-                    colors={['#4A3AFF', '#7B6FFF']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.navActivePill}
-                  >
-                    {tab.featherIcon ? (
-                      <Feather name={tab.featherIcon as any} size={iconSize} color={iconColor} />
-                    ) : (
-                      <MaterialCommunityIcons name={tab.mciIcon as any} size={iconSize} color={iconColor} />
-                    )}
-                    <Text style={styles.navActiveLabel}>{tab.label}</Text>
-                  </LinearGradient>
-                ) : (
-                  <View style={styles.navInactiveItem}>
-                    {tab.featherIcon ? (
-                      <Feather name={tab.featherIcon as any} size={iconSize} color={iconColor} />
-                    ) : (
-                      <MaterialCommunityIcons name={tab.mciIcon as any} size={iconSize} color={iconColor} />
-                    )}
-                    <Text style={styles.navInactiveLabel}>{tab.label}</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+      <View style={styles.navPill}>
+        {NAV_TABS.map(tab => {
+          const isActive = activeTab === tab.id;
+          const icon = tab.featherIcon
+            ? <Feather name={tab.featherIcon as any} size={24} color={isActive ? '#000' : 'rgba(255,255,255,0.6)'} />
+            : <MaterialCommunityIcons name={tab.mciIcon as any} size={24} color={isActive ? '#000' : 'rgba(255,255,255,0.6)'} />;
+          return (
+            <TouchableOpacity
+              key={tab.id}
+              onPress={() => onTabChange(tab.id)}
+              activeOpacity={0.75}
+              style={styles.navTabBtn}
+            >
+              {isActive ? (
+                <View style={styles.navActiveTab}>
+                  {icon}
+                  <Text style={styles.navActiveLabel}>{tab.label}</Text>
+                </View>
+              ) : (
+                <View style={styles.navInactiveTab}>
+                  {icon}
+                  <Text style={styles.navInactiveLabel}>{tab.label}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
@@ -175,69 +152,55 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  bottomNavOuter: {
+  navOuter: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     alignItems: 'center',
-    paddingTop: 12,
     zIndex: 20,
+    paddingHorizontal: 16,
   },
-  bottomNavWrapper: {
-    alignItems: 'center',
-  },
-  bottomNavInner: {
+  navPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.70)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.72)',
-    shadowColor: '#4A3AFF',
+    justifyContent: 'space-between',
+    width: '100%',
+    backgroundColor: '#000',
+    borderRadius: 100,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.09,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowOpacity: 0.35,
+    shadowRadius: 20,
+    elevation: 12,
   },
   navTabBtn: {
-    borderRadius: 999,
+    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  navActivePill: {
-    flexDirection: 'column',
+  navActiveTab: {
+    backgroundColor: '#fff',
+    borderRadius: 100,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
     alignItems: 'center',
     gap: 3,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: '#4A3AFF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.32,
-    shadowRadius: 8,
-    elevation: 4,
   },
   navActiveLabel: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 10,
+    color: '#000',
+    fontWeight: '600',
+    fontSize: 12,
   },
-  navInactiveItem: {
-    flexDirection: 'column',
+  navInactiveTab: {
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 4,
     gap: 3,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    minWidth: 52,
   },
   navInactiveLabel: {
-    color: '#A0A3BD',
+    color: 'rgba(255,255,255,0.6)',
     fontWeight: '500',
-    fontSize: 10,
+    fontSize: 12,
   },
 });
