@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Animated,
 } from 'react-native';
-import { Text, EmojiText } from '../components/Typography';
+import { Text } from '../components/Typography';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProductDetailScreen } from './ProductDetailScreen';
@@ -39,17 +39,17 @@ export const CatalogFlowContainer = () => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
-        onSnack('찜 목록에서 제거했어요', '🗑️');
+        onSnack('찜 목록에서 제거했어요');
       } else {
         next.add(id);
-        onSnack('찜 목록에 추가했어요!', '❤️');
+        onSnack('찜 목록에 추가했어요!');
       }
       return next;
     });
   };
 
   const handleAddToRoom = (item: FurnitureItem) => {
-    onSnack(`${item.name} 방에 추가됨`, item.thumbnail);
+    onSnack(`${item.name} 방에 추가됨`);
   };
 
   if (flow === 'detail' && selectedItem) {
@@ -128,7 +128,7 @@ const CatalogList = ({
               activeOpacity={0.85}
               style={[styles.tab, activeCategory === cat.id ? styles.tabActive : styles.tabInactive]}
             >
-              <EmojiText style={styles.tabIcon}>{cat.icon}</EmojiText>
+              <Feather name={cat.icon as any} size={13} color={activeCategory === cat.id ? '#fff' : '#514F6E'} />
               <Text style={[styles.tabLabel, activeCategory === cat.id ? styles.tabLabelActive : styles.tabLabelInactive]}>{cat.label}</Text>
             </TouchableOpacity>
           ))}
@@ -170,7 +170,7 @@ const CatalogList = ({
               >
                 <View style={styles.cardImageWrap}>
                   <View style={[styles.cardImage, { backgroundColor: `${item.color}30` }]}>
-                    <EmojiText style={styles.cardEmoji}>{item.thumbnail}</EmojiText>
+                    <Feather name={item.thumbnail as any} size={32} color={item.color === '#FFFFFF' ? '#514F6E' : item.color} />
                   </View>
                   {!item.isMyFurniture && (
                     <TouchableOpacity

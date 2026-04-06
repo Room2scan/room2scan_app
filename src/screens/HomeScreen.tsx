@@ -17,7 +17,7 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated';
-import { Text, EmojiText } from '../components/Typography';
+import { Text } from '../components/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -207,12 +207,12 @@ export const HomeScreen = () => {
               {POPULAR_FURNITURE.map(item => (
                 <TouchableOpacity
                   key={item.id}
-                  onPress={() => addSnack(`${item.name} 상세 보기`, item.thumbnail)}
+                  onPress={() => addSnack(`${item.name} 상세 보기`)}
                   activeOpacity={0.85}
                   style={styles.furnitureCard}
                 >
                   <View style={[styles.furnitureThumbnail, { backgroundColor: `${item.color}30` }]}>
-                    <EmojiText style={styles.furnitureEmoji}>{item.thumbnail}</EmojiText>
+                    <Feather name={item.thumbnail as any} size={32} color={item.color === '#FFFFFF' ? '#514F6E' : item.color} />
                   </View>
                   <View>
                     <Text style={styles.furnitureName} numberOfLines={1}>{item.name}</Text>

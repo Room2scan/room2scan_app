@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Text, EmojiText } from '../components/Typography';
+import { Text } from '../components/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,11 +21,11 @@ export const EditorScreen = () => {
         <View style={styles.backWall} />
         <View style={styles.leftWall} />
         {[
-          { emoji: '🛋️', left: '20%', top: '55%', bg: 'rgba(255,255,255,0.9)' },
-          { emoji: '🧸', left: '55%', top: '45%', bg: 'rgba(255,255,255,0.8)' },
+          { icon: 'home', left: '20%', top: '55%', bg: 'rgba(255,255,255,0.9)' },
+          { icon: 'grid', left: '55%', top: '45%', bg: 'rgba(255,255,255,0.8)' },
         ].map((item, i) => (
           <View key={i} style={[styles.sceneFurniture, { left: item.left as any, top: item.top as any, backgroundColor: item.bg }]}>
-            <EmojiText style={{ fontSize: 28 }}>{item.emoji}</EmojiText>
+            <Feather name={item.icon as any} size={24} color="#4A3AFF" />
           </View>
         ))}
         <Text style={styles.sceneHint}>드래그하여 회전</Text>

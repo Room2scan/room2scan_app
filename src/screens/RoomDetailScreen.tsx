@@ -9,7 +9,7 @@ import {
   Dimensions,
   Modal,
 } from 'react-native';
-import { Text, EmojiText } from '../components/Typography';
+import { Text } from '../components/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -66,7 +66,7 @@ export const RoomDetailScreen = () => {
     setRoomFurniture(prev => prev.filter(f => f.id !== selectedFurnitureId));
     setSelectedFurnitureId(null);
     setShowActionMenu(false);
-    onSnack(`${name} 삭제됨`, '🗑️');
+    onSnack(`${name} 삭제됨`);
   };
 
   const handleDuplicate = () => {
@@ -80,7 +80,7 @@ export const RoomDetailScreen = () => {
     setRoomFurniture(prev => [...prev, newItem]);
     setSelectedFurnitureId(null);
     setShowActionMenu(false);
-    onSnack(`${selectedItem.name} 복제됨`, '✨');
+    onSnack(`${selectedItem.name} 복제됨`);
   };
 
   const handleRotate = () => {
@@ -103,7 +103,7 @@ export const RoomDetailScreen = () => {
     };
     setRoomFurniture(prev => [...prev, newItem]);
     setShowAddSheet(false);
-    onSnack(`${item.name} 추가됨`, item.thumbnail);
+    onSnack(`${item.name} 추가됨`);
   };
 
   const actionMenuItems = [
@@ -148,7 +148,7 @@ export const RoomDetailScreen = () => {
               <View style={styles.mock3DGrid}>
                 {roomFurniture.slice(0, 3).map(item => (
                   <View key={item.id} style={styles.mock3DItem}>
-                    <EmojiText style={styles.mock3DEmoji}>{item.thumbnail}</EmojiText>
+                    <Feather name={item.thumbnail as any} size={24} color="#4A3AFF" />
                   </View>
                 ))}
               </View>
@@ -276,7 +276,7 @@ export const RoomDetailScreen = () => {
                       },
                     ]}
                   >
-                    <EmojiText style={styles.furnitureDotEmoji}>{item.thumbnail}</EmojiText>
+                    <Feather name={item.thumbnail as any} size={14} color="#4A3AFF" />
                   </TouchableOpacity>
                 ))}
               </View>
@@ -308,7 +308,7 @@ export const RoomDetailScreen = () => {
                   ]}
                 >
                   <View style={styles.furnitureIcon}>
-                    <EmojiText style={styles.furnitureEmoji}>{item.thumbnail}</EmojiText>
+                    <Feather name={item.thumbnail as any} size={20} color="#4A3AFF" />
                   </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.furnitureName} numberOfLines={1}>{item.name}</Text>
@@ -366,7 +366,7 @@ export const RoomDetailScreen = () => {
           {selectedItem && (
             <View style={styles.actionSheetHeader}>
               <View style={styles.actionSheetIcon}>
-                <EmojiText style={{ fontSize: 24 }}>{selectedItem.thumbnail}</EmojiText>
+                <Feather name={selectedItem.thumbnail as any} size={24} color="#4A3AFF" />
               </View>
               <View>
                 <Text style={styles.actionSheetName}>{selectedItem.name}</Text>
@@ -415,7 +415,7 @@ export const RoomDetailScreen = () => {
               {ALL_FURNITURE.map(item => (
                 <TouchableOpacity key={item.id} onPress={() => addFurnitureToRoom(item)} style={styles.addFurnitureCard}>
                   <View style={styles.addFurnitureThumbnail}>
-                    <EmojiText style={{ fontSize: 28 }}>{item.thumbnail}</EmojiText>
+                    <Feather name={item.thumbnail as any} size={24} color="#4A3AFF" />
                   </View>
                   <Text style={styles.addFurnitureName} numberOfLines={1}>{item.name}</Text>
                   <Text style={styles.addFurnitureDim}>{item.dimensions}</Text>

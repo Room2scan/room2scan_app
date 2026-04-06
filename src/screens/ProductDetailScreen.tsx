@@ -7,7 +7,7 @@ import {
   Animated,
   Dimensions,
 } from 'react-native';
-import { Text, EmojiText } from '../components/Typography';
+import { Text } from '../components/Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,9 +26,9 @@ const REVIEW_DATA = [
   { id: 'rv3', author: '박준서', rating: 5, text: '퀄리티 대비 가격이 합리적이에요.' },
 ];
 const RECOMMENDED_ITEMS = [
-  { id: 'rec1', name: 'LACK Table', thumb: '🧸', price: '₩15,000', color: '#4A3AFF' },
-  { id: 'rec2', name: 'KALLAX Shelf', thumb: '📚', price: '₩129,000', color: '#EAE8FF' },
-  { id: 'rec3', name: 'POÄNG Chair', thumb: '🪑', price: '₩179,000', color: '#897FFF' },
+  { id: 'rec1', name: 'LACK Table', thumb: 'grid', price: '₩15,000', color: '#4A3AFF' },
+  { id: 'rec2', name: 'KALLAX Shelf', thumb: 'layers', price: '₩129,000', color: '#EAE8FF' },
+  { id: 'rec3', name: 'POÄNG Chair', thumb: 'box', price: '₩179,000', color: '#897FFF' },
 ];
 const DETAIL_TABS = [{ id: 'specs' as const, label: '스펙' }, { id: 'materials' as const, label: '소재' }, { id: 'reviews' as const, label: '리뷰' }];
 const RATING_BARS = [{ stars: 5, width: 0.72 }, { stars: 4, width: 0.20 }, { stars: 3, width: 0.08 }];
@@ -106,7 +106,7 @@ export const ProductDetailScreen = ({
   const handleAddToRoom = () => {
     setAddedToRoom(true);
     onAddToRoom(item);
-    onSnack(`${item.name} 방에 추가됨`, item.thumbnail);
+    onSnack(`${item.name} 방에 추가됨`);
     setTimeout(() => setAddedToRoom(false), 2200);
   };
 
@@ -122,7 +122,7 @@ export const ProductDetailScreen = ({
           <Text style={styles.headerTitleText} numberOfLines={1}>{item.name}</Text>
         </Animated.View>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => onSnack('링크가 복사되었어요', '🔗')} style={styles.headerBtn} activeOpacity={0.8}>
+          <TouchableOpacity onPress={() => onSnack('링크가 복사되었어요')} style={styles.headerBtn} activeOpacity={0.8}>
             <Feather name="share-2" size={15} color="#170F49" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onToggleWishlist(item.id)} style={styles.headerBtn} activeOpacity={0.8}>
@@ -161,7 +161,7 @@ export const ProductDetailScreen = ({
           {/* Furniture preview */}
           <View style={styles.previewContent}>
             <View style={[styles.furnitureDisplay, { backgroundColor: `${selectedColor}25`, borderColor: `${accentColor}20` }]}>
-              <EmojiText style={styles.furnitureEmoji}>{item.thumbnail}</EmojiText>
+              <Feather name={item.thumbnail as any} size={72} color={item.color === '#FFFFFF' ? '#514F6E' : item.color} />
             </View>
             {view3DActive && (
               <Animated.View style={[styles.rotateHint, { opacity: heroOpacity }]}>
@@ -328,7 +328,7 @@ export const ProductDetailScreen = ({
               {RECOMMENDED_ITEMS.map(rec => (
                 <View key={rec.id} style={styles.recCard}>
                   <View style={[styles.recImage, { backgroundColor: `${rec.color}20` }]}>
-                    <EmojiText style={styles.recEmoji}>{rec.thumb}</EmojiText>
+                    <Feather name={rec.thumb as any} size={22} color={rec.color === '#FFFFFF' ? '#514F6E' : rec.color} />
                   </View>
                   <Text style={styles.recName} numberOfLines={1}>{rec.name}</Text>
                   <Text style={[styles.recPrice, { color: accentColor }]}>{rec.price}</Text>

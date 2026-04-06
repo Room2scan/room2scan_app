@@ -6,7 +6,7 @@ import {
   Animated,
   Platform,
 } from 'react-native';
-import { Text, EmojiText } from './Typography';
+import { Text } from './Typography';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Feather } from '@expo/vector-icons';
@@ -44,7 +44,7 @@ export const SnackbarContainer = ({
     <View style={styles.snackbarContainer} pointerEvents="none">
       {snacks.map(snack => (
         <View key={snack.id} style={styles.snackbar}>
-          {snack.icon && <EmojiText style={styles.snackbarIcon}>{snack.icon}</EmojiText>}
+          <Feather name="check-circle" size={14} color="rgba(255,255,255,0.7)" />
           <Text style={styles.snackbarText}>{snack.message}</Text>
         </View>
       ))}
