@@ -1,9 +1,8 @@
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type AppState = 'home' | 'camera' | 'cameraFurniture' | 'processing' | 'editor' | 'roomDetail';
 export type MainTab = 'home' | 'rooms' | 'catalog' | 'settings';
 export type CatalogCategory = 'wishlist' | 'sofa' | 'bed' | 'table' | 'shelf' | 'chair' | 'myFurniture';
 export type ViewMode = '3d' | '2d';
+
 export interface FurnitureItem {
   id: string;
   name: string;
@@ -16,6 +15,7 @@ export interface FurnitureItem {
   rating: number;
   isMyFurniture?: boolean;
 }
+
 export interface RoomFurnitureItem {
   id: string;
   name: string;
@@ -25,6 +25,7 @@ export interface RoomFurnitureItem {
   y: number;
   rotation: number;
 }
+
 export interface RoomProject {
   id: string;
   name: string;
@@ -39,11 +40,13 @@ export interface RoomProject {
   realPhotos: string[];
   description: string;
 }
+
 export interface SnackbarItem {
   id: string;
   message: string;
   icon?: string;
 }
+
 export interface HeroBanner {
   id: string;
   label: string;

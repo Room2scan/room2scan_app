@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Scan2Room",
+    "slug": "room2scan-rn",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#FBFBFE"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.scan2room.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#4A3AFF"
+      }
+    }
+  }
+}
