@@ -12,6 +12,7 @@ import { SettingsScreen } from './src/screens/SettingsScreen';
 import { RoomDetailScreen } from './src/screens/RoomDetailScreen';
 import { PanoramaCameraScreen } from './src/screens/PanoramaCameraScreen';
 import { ReconstructionScreen } from './src/screens/ReconstructionScreen';
+import { UnityEditorScreen } from './src/screens/UnityEditorScreen';
 import { SnackbarContainer } from './src/components/Shared';
 
 import { AppState, MainTab, SnackbarItem } from './src/types';
@@ -95,7 +96,7 @@ const EditorScreen = ({ onBack }: { onBack: () => void }) => {
                 <Feather name="grid" size={20} color="#514F6E" />
                 <Text style={editorStyles.viewModeText}>2D</Text>
               </View>
-              <View style={[editorStyles.viewModeItem, { color: '#4A3AFF' }]}>
+              <View style={editorStyles.viewModeItem}>
                 <Feather name="box" size={20} color="#4A3AFF" />
                 <Text style={[editorStyles.viewModeText, { color: '#4A3AFF' }]}>3D</Text>
               </View>
@@ -187,7 +188,7 @@ export default function App() {
       );
     }
     if (appState === 'editor') {
-      return <EditorScreen onBack={goHome} />;
+      return <UnityEditorScreen onBack={goHome} />;
     }
     if (appState === 'roomDetail') {
       return (

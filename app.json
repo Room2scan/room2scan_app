@@ -15,7 +15,8 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#4A3AFF"
-      }
+      },
+      "package": "com.scan2room.app"
     }
   }
 }

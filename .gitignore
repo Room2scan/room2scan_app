@@ -1,6 +1,7 @@
 node_modules/
 .expo/
 dist/
+build/
 npm-debug.*
 *.jks
 *.p8
@@ -10,3 +11,17 @@ npm-debug.*
 *.orig.*
 web-build/
 .DS_Store
+Thumbs.db
+
+# Local Android build output
+android/.gradle/
+android/local.properties
+android/**/build/
+android/app/debug.keystore
+
+# Unity Android export output is regenerated from room2scan_unity.
+unity/builds/
+
+# Local test artifacts
+metro-*.log
+room2scan-*.png
