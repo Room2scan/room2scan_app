@@ -14,9 +14,14 @@ import {
   UNITY_GAME_OBJECT,
   UNITY_RECEIVE_METHOD,
   UnityBridgeEnvelope,
+  createAddFurniturePayload,
+  createDeleteSelectedPayload,
   createMockRoomPayload,
   createMockUnityEvent,
+  createResetEditorPayload,
+  createRotateSelectedPayload,
   createSaveLayoutPayload,
+  createSelectFurniturePayload,
   serializeBridgeMessage,
 } from '../bridge/unityBridge';
 
@@ -47,17 +52,21 @@ const tryLoadUnityView = (): any | null => {
 
 const UnityView: any = tryLoadUnityView();
 
+let furnitureCounter = 0;
+const nextInstanceId = () => `furn_${++furnitureCounter}_${Date.now()}`;
+
 export const UnityEditorScreen = ({ onBack }: { onBack: () => void }) => {
   const insets = useSafeAreaInsets();
   const unityRef = useRef<UnityViewHandle | null>(null);
   const [logs, setLogs] = useState<LogItem[]>([]);
-  const [lastLoadRequestId, setLastLoadRequestId] = useState<string | undefined>();
+  const [selectedInstanceId, setSelectedInstanceId] = useState<string | null>(null);
+  const [addedInstanceIds, setAddedInstanceIds] = useState<string[]>([]);
 
   const addLog = (direction: LogItem['direction'], label: string, body: string) => {
     setLogs(prev => [
       { id: `${Date.now()}_${Math.random()}`, direction, label, body },
       ...prev,
-    ].slice(0, 8));
+    ].slice(0, 12));
   };
 
   const receiveFromUnity = (rawMessage: string) => {
@@ -65,40 +74,23 @@ export const UnityEditorScreen = ({ onBack }: { onBack: () => void }) => {
   };
 
   const simulateUnityResponse = (command: UnityBridgeEnvelope) => {
-    if (command.name === 'LoadRoom') {
-      receiveFromUnity(serializeBridgeMessage(createMockUnityEvent(command.requestId, 'RoomLoaded', {
-        roomId: 'replica_room0',
-        success: true,
-      })));
-      return;
-    }
-
-    if (command.name === 'SaveLayout') {
-      receiveFromUnity(serializeBridgeMessage(createMockUnityEvent(command.requestId, 'LayoutSaved', {
-        layout: {
-          schemaVersion: 'layout-json/v1',
-          layoutId: 'mock_layout_0001',
+    switch (command.name) {
+      case 'LoadRoom':
+        receiveFromUnity(serializeBridgeMessage(createMockUnityEvent(command.requestId, 'RoomLoaded', {
           roomId: 'replica_room0',
-          roomSchemaVersion: 'room-json/v1',
-          editorSessionId: 'rn_p0_fallback',
-          savedAt: new Date().toISOString(),
-          coordinateSystem: {
-            unit: 'meter',
-            handedness: 'left',
-            upAxis: '+Y',
-            forwardAxis: '+Z',
+          success: true,
+        })));
+        break;
+      case 'SaveLayout':
+        receiveFromUnity(serializeBridgeMessage(createMockUnityEvent(command.requestId, 'LayoutSaved', {
+          layout: {
+            schemaVersion: 'layout-json/v1',
+            layoutId: 'mock_layout_0001',
+            roomId: 'replica_room0',
+            items: addedInstanceIds.map(id => ({ instanceId: id, catalogId: 'mock_chair', position: { x: 0, y: 0, z: 0 }, rotationYDeg: 0, scale: 0.8 })),
           },
-          items: [],
-          validation: {
-            isValid: true,
-            invalidItemIds: [],
-            warnings: [],
-          },
-          extensions: {
-            source: 'rn_fallback_mock',
-          },
-        },
-      })));
+        })));
+        break;
     }
   };
 
@@ -106,16 +98,47 @@ export const UnityEditorScreen = ({ onBack }: { onBack: () => void }) => {
     const message = serializeBridgeMessage(command);
     addLog('RN -> Unity', command.name, message);
 
-    if (command.name === 'LoadRoom') {
-      setLastLoadRequestId(command.requestId);
-    }
-
     if (UnityView && unityRef.current) {
       unityRef.current.postMessage(UNITY_GAME_OBJECT, UNITY_RECEIVE_METHOD, message);
       return;
     }
 
     simulateUnityResponse(command);
+  };
+
+  const handleAddFurniture = () => {
+    const instanceId = nextInstanceId();
+    const x = (Math.random() - 0.5) * 4;
+    const z = (Math.random() - 0.5) * 4;
+    sendToUnity(createAddFurniturePayload(instanceId, 'mock_chair', { x, y: 0, z }));
+    setAddedInstanceIds(prev => [...prev, instanceId]);
+    setSelectedInstanceId(instanceId);
+  };
+
+  const handleSelectLast = () => {
+    if (addedInstanceIds.length === 0) return;
+    const instanceId = addedInstanceIds[addedInstanceIds.length - 1];
+    sendToUnity(createSelectFurniturePayload(instanceId));
+    setSelectedInstanceId(instanceId);
+  };
+
+  const handleRotate = () => {
+    sendToUnity(createRotateSelectedPayload(45));
+  };
+
+  const handleDelete = () => {
+    sendToUnity(createDeleteSelectedPayload());
+    if (selectedInstanceId) {
+      setAddedInstanceIds(prev => prev.filter(id => id !== selectedInstanceId));
+      setSelectedInstanceId(null);
+    }
+  };
+
+  const handleReset = () => {
+    sendToUnity(createResetEditorPayload());
+    setAddedInstanceIds([]);
+    setSelectedInstanceId(null);
+    furnitureCounter = 0;
   };
 
   useEffect(() => {
@@ -131,7 +154,7 @@ export const UnityEditorScreen = ({ onBack }: { onBack: () => void }) => {
           <Feather name="chevron-left" size={20} color="#170F49" />
         </TouchableOpacity>
         <View style={styles.titleBlock}>
-          <Text style={styles.kicker}>P0 Unity Bridge</Text>
+          <Text style={styles.kicker}>P1 Furniture</Text>
           <Text style={styles.title}>Room Editor</Text>
         </View>
         <TouchableOpacity onPress={() => sendToUnity(createSaveLayoutPayload())} style={styles.saveButton} activeOpacity={0.86}>
@@ -163,6 +186,40 @@ export const UnityEditorScreen = ({ onBack }: { onBack: () => void }) => {
       </View>
 
       <View style={[styles.controls, { paddingBottom: insets.bottom + 16 }]}>
+        <View style={styles.furnitureToolbar}>
+          <TouchableOpacity onPress={handleAddFurniture} style={styles.toolBtn} activeOpacity={0.82}>
+            <Feather name="plus-square" size={18} color="#4A3AFF" />
+            <Text style={styles.toolBtnText}>Add</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleSelectLast}
+            style={[styles.toolBtn, addedInstanceIds.length === 0 && styles.toolBtnDisabled]}
+            activeOpacity={0.82}
+            disabled={addedInstanceIds.length === 0}
+          >
+            <Feather name="mouse-pointer" size={18} color={addedInstanceIds.length === 0 ? '#C0C2D0' : '#4A3AFF'} />
+            <Text style={[styles.toolBtnText, addedInstanceIds.length === 0 && styles.toolBtnTextDisabled]}>Select</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleRotate}
+            style={[styles.toolBtn, !selectedInstanceId && styles.toolBtnDisabled]}
+            activeOpacity={0.82}
+            disabled={!selectedInstanceId}
+          >
+            <Feather name="rotate-cw" size={18} color={selectedInstanceId ? '#4A3AFF' : '#C0C2D0'} />
+            <Text style={[styles.toolBtnText, !selectedInstanceId && styles.toolBtnTextDisabled]}>Rotate</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleDelete}
+            style={[styles.toolBtn, !selectedInstanceId && styles.toolBtnDisabled]}
+            activeOpacity={0.82}
+            disabled={!selectedInstanceId}
+          >
+            <Feather name="trash-2" size={18} color={selectedInstanceId ? '#EF4444' : '#C0C2D0'} />
+            <Text style={[styles.toolBtnText, !selectedInstanceId && styles.toolBtnTextDisabled, selectedInstanceId && styles.toolBtnTextDanger]}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.buttonRow}>
           <TouchableOpacity onPress={() => sendToUnity(createMockRoomPayload())} style={styles.secondaryButton} activeOpacity={0.86}>
             <Feather name="upload" size={16} color="#4A3AFF" />
@@ -172,12 +229,15 @@ export const UnityEditorScreen = ({ onBack }: { onBack: () => void }) => {
             <Feather name="download" size={16} color="#fff" />
             <Text style={styles.primaryButtonText}>SaveLayout</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={handleReset} style={styles.dangerButton} activeOpacity={0.86}>
+            <Feather name="refresh-cw" size={16} color="#EF4444" />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.logPanel}>
           <View style={styles.logHeader}>
             <Text style={styles.logTitle}>Bridge log</Text>
-            <Text style={styles.logMeta}>{UnityView ? 'native' : 'fallback'}</Text>
+            <Text style={styles.logMeta}>{UnityView ? 'native' : 'fallback'} · {addedInstanceIds.length} items</Text>
           </View>
           <ScrollView style={styles.logScroll} showsVerticalScrollIndicator={false}>
             {logs.map(log => (
@@ -186,12 +246,11 @@ export const UnityEditorScreen = ({ onBack }: { onBack: () => void }) => {
                   <Text style={styles.logDirection}>{log.direction}</Text>
                   <Text style={styles.logLabel}>{log.label}</Text>
                 </View>
-                <Text style={styles.logBody} numberOfLines={3}>{log.body}</Text>
+                <Text style={styles.logBody} numberOfLines={2}>{log.body}</Text>
               </View>
             ))}
             {logs.length === 0 && <Text style={styles.emptyLog}>Waiting for bridge messages.</Text>}
           </ScrollView>
-          {lastLoadRequestId && <Text style={styles.requestHint}>Last LoadRoom request: {lastLoadRequestId}</Text>}
         </View>
       </View>
     </View>
@@ -237,7 +296,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 96,
     marginHorizontal: 16,
-    marginBottom: 286,
+    marginBottom: 316,
     borderRadius: 8,
     overflow: 'hidden',
     backgroundColor: '#10121D',
@@ -281,39 +340,68 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
   },
-  buttonRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
+  furnitureToolbar: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    backgroundColor: '#F1F2F9',
+    borderRadius: 10,
+  },
+  toolBtn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+  },
+  toolBtnDisabled: { backgroundColor: 'transparent' },
+  toolBtnText: { fontSize: 10, fontWeight: '800', color: '#4A3AFF' },
+  toolBtnTextDisabled: { color: '#C0C2D0' },
+  toolBtnTextDanger: { color: '#EF4444' },
+  buttonRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
   secondaryButton: {
     flex: 1,
-    minHeight: 48,
+    minHeight: 44,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
     backgroundColor: '#ECEBFF',
   },
   secondaryButtonText: { fontSize: 13, fontWeight: '800', color: '#4A3AFF' },
   primaryButton: {
     flex: 1,
-    minHeight: 48,
+    minHeight: 44,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
     backgroundColor: '#4A3AFF',
   },
   primaryButtonText: { fontSize: 13, fontWeight: '800', color: '#fff' },
-  logPanel: { height: 198, borderRadius: 8, padding: 12, backgroundColor: '#F1F2F9' },
+  dangerButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FEE2E2',
+  },
+  logPanel: { height: 160, borderRadius: 8, padding: 10, backgroundColor: '#F1F2F9' },
   logHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   logTitle: { fontSize: 13, fontWeight: '800', color: '#170F49' },
   logMeta: { fontSize: 10, fontWeight: '800', color: '#7A7D92', textTransform: 'uppercase' },
   logScroll: { flex: 1 },
-  logItem: { padding: 10, borderRadius: 8, backgroundColor: '#fff', marginBottom: 8 },
-  logItemHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
+  logItem: { padding: 8, borderRadius: 6, backgroundColor: '#fff', marginBottom: 6 },
+  logItemHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 },
   logDirection: { fontSize: 10, fontWeight: '900', color: '#4A3AFF' },
   logLabel: { fontSize: 10, fontWeight: '800', color: '#7A7D92' },
   logBody: { fontSize: 10, lineHeight: 14, color: '#514F6E' },
   emptyLog: { fontSize: 12, color: '#7A7D92' },
-  requestHint: { marginTop: 6, fontSize: 10, color: '#7A7D92' },
 });

@@ -91,6 +91,28 @@ export const createMockRoomPayload = () =>
 export const createSaveLayoutPayload = () =>
   createBridgeCommand('SaveLayout', {});
 
+export const createAddFurniturePayload = (
+  instanceId: string,
+  catalogId: string,
+  position: { x: number; y: number; z: number } = { x: 0, y: 0, z: 0 }
+) =>
+  createBridgeCommand('AddFurniture', { instanceId, catalogId, position });
+
+export const createSelectFurniturePayload = (instanceId: string) =>
+  createBridgeCommand('SelectFurniture', { instanceId });
+
+export const createRotateSelectedPayload = (deltaDeg: number) =>
+  createBridgeCommand('RotateSelected', { deltaDeg });
+
+export const createDeleteSelectedPayload = () =>
+  createBridgeCommand('DeleteSelected', {});
+
+export const createResetEditorPayload = () =>
+  createBridgeCommand('ResetEditor', {});
+
+export const createLoadFurnitureCatalogPayload = (catalogId: string) =>
+  createBridgeCommand('LoadFurnitureCatalog', { catalogId });
+
 export const createMockUnityEvent = (
   requestId: string | undefined,
   name: 'RoomLoaded' | 'LayoutSaved',
