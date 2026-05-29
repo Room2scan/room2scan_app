@@ -16,6 +16,7 @@ Thumbs.db
 # Local Android build output
 android/.gradle/
 android/local.properties
+android/unity.local.properties
 android/**/build/
 android/app/debug.keystore
 
