@@ -1,17 +1,118 @@
 import { FurnitureItem, RoomProject, HeroBanner, CatalogCategory } from './types';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ReplicaCAD frl_apartment objects  (92 GLBs)
+// id = GLB filename without extension = catalogId sent to Unity
+// ─────────────────────────────────────────────────────────────────────────────
 export const ALL_FURNITURE: FurnitureItem[] = [
-  { id: 'f1', name: 'NORDLI Chest', type: 'Dresser', dimensions: '120×80 cm', price: '₩249,000', thumbnail: '🗄️', color: '#FFFFFF', isWishlisted: true, rating: 4.7 },
-  { id: 'f2', name: 'EKERÖ Armchair', type: 'Chair', dimensions: '70×73 cm', price: '₩199,000', thumbnail: '🪑', color: '#897FFF', isWishlisted: true, rating: 4.9 },
-  { id: 'f3', name: 'LACK Table', type: 'Table', dimensions: '55×55 cm', price: '₩15,000', thumbnail: '🧸', color: '#4A3AFF', isWishlisted: false, rating: 4.5 },
-  { id: 'f4', name: 'KALLAX Shelf', type: 'Shelf', dimensions: '77×147 cm', price: '₩129,000', thumbnail: '📚', color: '#EAE8FF', isWishlisted: true, rating: 4.8 },
-  { id: 'f5', name: 'MALM Bed Frame', type: 'Bed', dimensions: '160×200 cm', price: '₩349,000', thumbnail: '🛏️', color: '#D9DBE9', isWishlisted: false, rating: 4.6 },
-  { id: 'f6', name: 'POÄNG Chair', type: 'Chair', dimensions: '68×82 cm', price: '₩179,000', thumbnail: '🪑', color: '#897FFF', isWishlisted: false, rating: 4.4 },
-  { id: 'f7', name: 'BILLY Bookcase', type: 'Shelf', dimensions: '80×202 cm', price: '₩89,000', thumbnail: '📖', color: '#F1F2F9', isWishlisted: true, rating: 4.8 },
-  { id: 'f8', name: 'HEMNES Dresser', type: 'Dresser', dimensions: '108×96 cm', price: '₩299,000', thumbnail: '🗄️', color: '#EAE8FF', isWishlisted: false, rating: 4.7 },
-  { id: 'f9', name: 'EKTORP Sofa', type: 'Sofa', dimensions: '235×88 cm', price: '₩599,000', thumbnail: '🛋️', color: '#D9DBE9', isWishlisted: true, rating: 4.9 },
-  { id: 'f10', name: 'FRIHETEN Sofa', type: 'Sofa', dimensions: '230×151 cm', price: '₩699,000', thumbnail: '🛋️', color: '#897FFF', isWishlisted: false, rating: 4.6 },
-  { id: 'mf1', name: '내 소파 (스캔)', type: 'Sofa', dimensions: '210×90 cm', price: '직접 스캔', thumbnail: '🛋️', color: '#4A3AFF', isWishlisted: false, rating: 5.0, isMyFurniture: true },
+  // ── Seating ───────────────────────────────────────────────────────────────
+  { id: 'frl_apartment_sofa',                  name: '소파',           type: 'Sofa',        dimensions: '-', price: '3D 모델', thumbnail: '🛋️', color: '#D9DBE9', isWishlisted: true,  rating: 4.8 },
+  { id: 'frl_apartment_beanbag',               name: '빈백',           type: 'Chair',       dimensions: '-', price: '3D 모델', thumbnail: '🫘', color: '#897FFF', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_chair_01',              name: '의자 1',         type: 'Chair',       dimensions: '-', price: '3D 모델', thumbnail: '🪑', color: '#897FFF', isWishlisted: true,  rating: 4.5 },
+  { id: 'frl_apartment_chair_04',              name: '의자 4',         type: 'Chair',       dimensions: '-', price: '3D 모델', thumbnail: '🪑', color: '#897FFF', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_chair_05',              name: '의자 5',         type: 'Chair',       dimensions: '-', price: '3D 모델', thumbnail: '🪑', color: '#897FFF', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_stool_02',              name: '스툴',           type: 'Chair',       dimensions: '-', price: '3D 모델', thumbnail: '🪑', color: '#897FFF', isWishlisted: false, rating: 4.0 },
+
+  // ── Tables ────────────────────────────────────────────────────────────────
+  { id: 'frl_apartment_table_01',              name: '테이블 1',       type: 'Table',       dimensions: '-', price: '3D 모델', thumbnail: '🪵', color: '#C7D2FE', isWishlisted: true,  rating: 4.5 },
+  { id: 'frl_apartment_table_02',              name: '테이블 2',       type: 'Table',       dimensions: '-', price: '3D 모델', thumbnail: '🪵', color: '#C7D2FE', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_table_03',              name: '테이블 3',       type: 'Table',       dimensions: '-', price: '3D 모델', thumbnail: '🪵', color: '#C7D2FE', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_table_04',              name: '테이블 4',       type: 'Table',       dimensions: '-', price: '3D 모델', thumbnail: '🪵', color: '#C7D2FE', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_tvstand',               name: 'TV 스탠드',      type: 'Table',       dimensions: '-', price: '3D 모델', thumbnail: '🪵', color: '#C7D2FE', isWishlisted: false, rating: 4.0 },
+
+  // ── Shelves / Storage ─────────────────────────────────────────────────────
+  { id: 'frl_apartment_cabinet',               name: '캐비넷',         type: 'Shelf',       dimensions: '-', price: '3D 모델', thumbnail: '🗄️', color: '#EAE8FF', isWishlisted: true,  rating: 4.5 },
+  { id: 'frl_apartment_rack_01',               name: '랙 선반',        type: 'Shelf',       dimensions: '-', price: '3D 모델', thumbnail: '🗄️', color: '#EAE8FF', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_wall_cabinet_01',       name: '벽 캐비넷 1',    type: 'Shelf',       dimensions: '-', price: '3D 모델', thumbnail: '🗄️', color: '#EAE8FF', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_wall_cabinet_02',       name: '벽 캐비넷 2',    type: 'Shelf',       dimensions: '-', price: '3D 모델', thumbnail: '🗄️', color: '#EAE8FF', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_wall_cabinet_03',       name: '벽 캐비넷 3',    type: 'Shelf',       dimensions: '-', price: '3D 모델', thumbnail: '🗄️', color: '#EAE8FF', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_basket',                name: '바구니',         type: 'Shelf',       dimensions: '-', price: '3D 모델', thumbnail: '🧺', color: '#FEF3C7', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_box',                   name: '상자',           type: 'Shelf',       dimensions: '-', price: '3D 모델', thumbnail: '📦', color: '#FEF3C7', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_shoebox_01',            name: '신발 상자',      type: 'Shelf',       dimensions: '-', price: '3D 모델', thumbnail: '📦', color: '#FEF3C7', isWishlisted: false, rating: 4.0 },
+
+  // ── Kitchen ───────────────────────────────────────────────────────────────
+  { id: 'frl_apartment_bowl_01',               name: '그릇 1',         type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🍜', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_bowl_02',               name: '그릇 2',         type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🍜', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_bowl_03',               name: '그릇 3',         type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🍜', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_bowl_06',               name: '그릇 6',         type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🍜', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_bowl_07',               name: '그릇 7',         type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🍜', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_cup_01',                name: '컵 1',           type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '☕', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_cup_02',                name: '컵 2',           type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '☕', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_cup_03',                name: '컵 3',           type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '☕', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_cup_05',                name: '컵 5',           type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '☕', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_plate_01',              name: '접시 1',         type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🍽️', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_plate_02',              name: '접시 2',         type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🍽️', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_pan_01',                name: '프라이팬',       type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🍳', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_knifeblock',            name: '칼 블록',        type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🔪', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_choppingboard_02',      name: '도마',           type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🪵', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_sponge_dish',           name: '스폰지 받침',    type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🧽', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_kitchen_utensil_01',    name: '주방 도구 1',    type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🥄', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_kitchen_utensil_02',    name: '주방 도구 2',    type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🥄', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_kitchen_utensil_03',    name: '주방 도구 3',    type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🥄', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_kitchen_utensil_04',    name: '주방 도구 4',    type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🥄', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_kitchen_utensil_05',    name: '주방 도구 5',    type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🥄', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_kitchen_utensil_06',    name: '주방 도구 6',    type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🥄', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_kitchen_utensil_08',    name: '주방 도구 8',    type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🥄', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_kitchen_utensil_09',    name: '주방 도구 9',    type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🥄', color: '#FEE2E2', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_refrigerator',          name: '냉장고',         type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🧊', color: '#D1FAE5', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_small_appliance_01',    name: '소형 가전 1',    type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🫙', color: '#D1FAE5', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_small_appliance_02',    name: '소형 가전 2',    type: 'Kitchen',     dimensions: '-', price: '3D 모델', thumbnail: '🫙', color: '#D1FAE5', isWishlisted: false, rating: 4.0 },
+
+  // ── Electronics ───────────────────────────────────────────────────────────
+  { id: 'frl_apartment_tv_object',             name: 'TV',             type: 'Electronics', dimensions: '-', price: '3D 모델', thumbnail: '📺', color: '#DBEAFE', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_tv_screen',             name: 'TV 스크린',      type: 'Electronics', dimensions: '-', price: '3D 모델', thumbnail: '📺', color: '#DBEAFE', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_monitor',               name: '모니터',         type: 'Electronics', dimensions: '-', price: '3D 모델', thumbnail: '🖥️', color: '#DBEAFE', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_monitor_stand',         name: '모니터 스탠드',  type: 'Electronics', dimensions: '-', price: '3D 모델', thumbnail: '🖥️', color: '#DBEAFE', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_setupbox',              name: '셋탑박스',       type: 'Electronics', dimensions: '-', price: '3D 모델', thumbnail: '📦', color: '#DBEAFE', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_camera_02',             name: '카메라',         type: 'Electronics', dimensions: '-', price: '3D 모델', thumbnail: '📷', color: '#DBEAFE', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_remote-control_01',     name: '리모컨',         type: 'Electronics', dimensions: '-', price: '3D 모델', thumbnail: '📱', color: '#DBEAFE', isWishlisted: false, rating: 4.0 },
+
+  // ── Decor / Lighting ──────────────────────────────────────────────────────
+  { id: 'frl_apartment_lamp_01',               name: '램프 1',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '💡', color: '#FEF9C3', isWishlisted: true,  rating: 4.5 },
+  { id: 'frl_apartment_lamp_02',               name: '램프 2',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '💡', color: '#FEF9C3', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_indoor_plant_01',       name: '실내 식물 1',    type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🌿', color: '#D1FAE5', isWishlisted: true,  rating: 4.5 },
+  { id: 'frl_apartment_indoor_plant_02',       name: '실내 식물 2',    type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🌿', color: '#D1FAE5', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_vase_01',               name: '꽃병 1',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🏺', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_vase_02',               name: '꽃병 2',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🏺', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_picture_01',            name: '그림 1',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🖼️', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_picture_02',            name: '그림 2',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🖼️', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_picture_03',            name: '그림 3',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🖼️', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_picture_04',            name: '그림 4',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🖼️', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_clock',                 name: '시계',           type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🕐', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_cushion_01',            name: '쿠션 1',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🛋️', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_cushion_03',            name: '쿠션 3',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🛋️', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_rug_01',                name: '러그 1',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🟫', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_rug_02',                name: '러그 2',         type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🟫', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_mat',                   name: '매트',           type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🟫', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_towel',                 name: '타올',           type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🧻', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_cloth_01',              name: '패브릭 1',       type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🧣', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_cloth_02',              name: '패브릭 2',       type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🧣', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_cloth_03',              name: '패브릭 3',       type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🧣', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_cloth_04',              name: '패브릭 4',       type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '🧣', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_book_01',               name: '책 1',           type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '📚', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_book_02',               name: '책 2',           type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '📚', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_book_03',               name: '책 3',           type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '📚', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_book_04',               name: '책 4',           type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '📚', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_book_05',               name: '책 5',           type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '📚', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_book_06',               name: '책 6',           type: 'Decor',       dimensions: '-', price: '3D 모델', thumbnail: '📚', color: '#F1F2F9', isWishlisted: false, rating: 4.0 },
+
+  // ── Other / Misc ──────────────────────────────────────────────────────────
+  { id: 'frl_apartment_bike_01',               name: '자전거 1',       type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '🚲', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_bike_02',               name: '자전거 2',       type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '🚲', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_bin_01',                name: '쓰레기통 1',     type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '🗑️', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_bin_02',                name: '쓰레기통 2',     type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '🗑️', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_bin_03',                name: '쓰레기통 3',     type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '🗑️', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_clothes_hanger_01',     name: '옷걸이 1',       type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '👔', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_clothes_hanger_02',     name: '옷걸이 2',       type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '👔', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_handbag',               name: '핸드백',         type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '👜', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_shoe_01',               name: '신발 1',         type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '👟', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_shoe_02',               name: '신발 2',         type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '👟', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_shoe_03',               name: '신발 3',         type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '👟', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_shoe_04',               name: '신발 4',         type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '👟', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+  { id: 'frl_apartment_umbrella',              name: '우산',           type: 'Other',       dimensions: '-', price: '3D 모델', thumbnail: '☂️', color: '#F3F4F6', isWishlisted: false, rating: 4.0 },
+
+  // ── 내 가구 (스캔) ─────────────────────────────────────────────────────────
+  { id: 'mf1', name: '내 소파 (스캔)',   type: 'Sofa',  dimensions: '210×90 cm', price: '직접 스캔', thumbnail: '🛋️', color: '#4A3AFF', isWishlisted: false, rating: 5.0, isMyFurniture: true },
   { id: 'mf2', name: '원목 책상 (스캔)', type: 'Table', dimensions: '140×70 cm', price: '직접 스캔', thumbnail: '🪵', color: '#897FFF', isWishlisted: false, rating: 5.0, isMyFurniture: true },
 ];
 
@@ -26,9 +127,9 @@ export const MY_ROOMS: RoomProject[] = [
       'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=400&q=75',
     ],
     furniture: [
-      { id: 'rf1', name: 'MALM Bed Frame', thumbnail: '🛏️', dimensions: '160×200 cm', x: 20, y: 15, rotation: 0 },
-      { id: 'rf2', name: 'NORDLI Chest', thumbnail: '🗄️', dimensions: '120×80 cm', x: 60, y: 20, rotation: 90 },
-      { id: 'rf3', name: 'POÄNG Chair', thumbnail: '🪑', dimensions: '68×82 cm', x: 55, y: 55, rotation: 45 },
+      { id: 'rf1', name: '의자 1',    thumbnail: '🪑', dimensions: '-',       x: 20, y: 15, rotation: 0  },
+      { id: 'rf2', name: '캐비넷',    thumbnail: '🗄️', dimensions: '-',       x: 60, y: 20, rotation: 90 },
+      { id: 'rf3', name: '빈백',      thumbnail: '🫘', dimensions: '-',       x: 55, y: 55, rotation: 45 },
     ],
   },
   {
@@ -41,9 +142,9 @@ export const MY_ROOMS: RoomProject[] = [
       'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=400&q=75',
     ],
     furniture: [
-      { id: 'rf4', name: 'EKTORP Sofa', thumbnail: '🛋️', dimensions: '235×88 cm', x: 25, y: 60, rotation: 0 },
-      { id: 'rf5', name: 'LACK Table', thumbnail: '🧸', dimensions: '55×55 cm', x: 50, y: 45, rotation: 0 },
-      { id: 'rf6', name: 'BILLY Bookcase', thumbnail: '📖', dimensions: '80×202 cm', x: 10, y: 20, rotation: 0 },
+      { id: 'rf4', name: '소파',      thumbnail: '🛋️', dimensions: '-', x: 25, y: 60, rotation: 0 },
+      { id: 'rf5', name: '테이블 1',  thumbnail: '🪵', dimensions: '-', x: 50, y: 45, rotation: 0 },
+      { id: 'rf6', name: '랙 선반',   thumbnail: '🗄️', dimensions: '-', x: 10, y: 20, rotation: 0 },
     ],
   },
   {
@@ -57,7 +158,7 @@ export const MY_ROOMS: RoomProject[] = [
     ],
     furniture: [
       { id: 'rf7', name: '원목 책상 (스캔)', thumbnail: '🪵', dimensions: '140×70 cm', x: 30, y: 30, rotation: 0 },
-      { id: 'rf8', name: 'KALLAX Shelf', thumbnail: '📚', dimensions: '77×147 cm', x: 70, y: 15, rotation: 0 },
+      { id: 'rf8', name: '벽 캐비넷 1',      thumbnail: '🗄️', dimensions: '-',         x: 70, y: 15, rotation: 0 },
     ],
   },
 ];
@@ -84,13 +185,13 @@ export const HERO_BANNERS: HeroBanner[] = [
 ];
 
 export const CATEGORY_TABS: { id: CatalogCategory; label: string; icon: string }[] = [
-  { id: 'wishlist', label: '찜한 목록', icon: '❤️' },
-  { id: 'sofa', label: '소파', icon: '🛋️' },
-  { id: 'bed', label: '침대', icon: '🛏️' },
-  { id: 'table', label: '테이블', icon: '🧸' },
-  { id: 'shelf', label: '선반', icon: '📚' },
-  { id: 'chair', label: '의자', icon: '🪑' },
-  { id: 'myFurniture', label: '내 가구', icon: '📷' },
+  { id: 'wishlist',     label: '찜한 목록', icon: '❤️'  },
+  { id: 'sofa',         label: '소파',      icon: '🛋️' },
+  { id: 'chair',        label: '의자',      icon: '🪑'  },
+  { id: 'table',        label: '테이블',    icon: '🪵'  },
+  { id: 'shelf',        label: '수납',      icon: '🗄️' },
+  { id: 'bed',          label: '주방',      icon: '🍳'  },
+  { id: 'myFurniture',  label: '내 가구',   icon: '📷'  },
 ];
 
-export const POPULAR_FURNITURE = ALL_FURNITURE.filter(f => !f.isMyFurniture).slice(0, 4);
+export const POPULAR_FURNITURE = ALL_FURNITURE.filter(f => !f.isMyFurniture && f.isWishlisted).slice(0, 4);

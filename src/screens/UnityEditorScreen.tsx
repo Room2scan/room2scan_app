@@ -96,14 +96,15 @@ const nextInstanceId = () => `furn_${++furnitureCounter}_${Date.now()}`;
 
 // ─── Editor category tabs (subset of main catalog) ───────────────────────────
 const EDITOR_CATS: { label: string; type: string | null }[] = [
-  { label: '전체',   type: null         },
-  { label: '소파',   type: 'Sofa'       },
-  { label: '침대',   type: 'Bed'        },
-  { label: '의자',   type: 'Chair'      },
-  { label: '테이블', type: 'Table'      },
-  { label: '선반',   type: 'Shelf'      },
-  { label: '드레서', type: 'Dresser'    },
-  { label: '내 가구', type: 'myFurniture' },
+  { label: '전체',    type: null           },
+  { label: '소파',    type: 'Sofa'         },
+  { label: '의자',    type: 'Chair'        },
+  { label: '테이블',  type: 'Table'        },
+  { label: '수납',    type: 'Shelf'        },
+  { label: '주방',    type: 'Kitchen'      },
+  { label: '장식',    type: 'Decor'        },
+  { label: '전자기기', type: 'Electronics'  },
+  { label: '내 가구', type: 'myFurniture'  },
 ];
 
 const TOOLS: { id: EditorToolId; label: string; icon: string }[] = [

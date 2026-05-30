@@ -107,7 +107,8 @@ const CatalogList = ({
   const filteredItems: FurnitureItem[] = (() => {
     if (activeCategory === 'wishlist') return ALL_FURNITURE.filter(f => wishlistIds.has(f.id));
     if (activeCategory === 'myFurniture') return ALL_FURNITURE.filter(f => f.isMyFurniture);
-    const typeMap: Record<string, string> = { sofa: 'Sofa', bed: 'Bed', table: 'Table', shelf: 'Shelf', chair: 'Chair' };
+    // 'bed' slot is repurposed as '주방 / Kitchen' since ReplicaCAD has no bed objects.
+    const typeMap: Record<string, string> = { sofa: 'Sofa', bed: 'Kitchen', table: 'Table', shelf: 'Shelf', chair: 'Chair' };
     return ALL_FURNITURE.filter(f => !f.isMyFurniture && f.type === typeMap[activeCategory]);
   })();
 

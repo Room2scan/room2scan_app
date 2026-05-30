@@ -83,24 +83,30 @@ export const createBridgeCommand = <TPayload extends Record<string, unknown>>(
 
 // ─── RN → Unity commands ──────────────────────────────────────────────────────
 
-/** LoadRoom — load the room mesh */
+// ─── ReplicaCAD local dataset paths ──────────────────────────────────────────
+// Adjust REPLICA_CAD_ROOT if the dataset lives elsewhere on the machine.
+const REPLICA_CAD_ROOT = 'E:\\unity\\replica_cad_data';
+
+/** LoadRoom — load the ReplicaCAD frl_apartment GLB + auto-place scene objects */
 export const createMockRoomPayload = () =>
   createBridgeCommand('LoadRoom', {
     room: {
       schemaVersion: 'room-json/v1',
-      roomId: 'replica_room0',
+      roomId: 'replica_cad_apt_0',
       source: {
-        datasetName: 'replica',
+        datasetName: 'replicacad',
         datasetVersion: 'v1',
-        sceneId: 'room0',
+        sceneId: 'apt_0',
         conversion: {
-          tool: 'server-replica-glb-converter',
-          toolVersion: '0.1.0',
+          tool: 'replicacad-glb-native',
+          toolVersion: '1.0.0',
           convertedAt: new Date().toISOString(),
-          notes: 'P0 mock room payload.',
+          notes: 'frl_apartment GLB loaded directly from local ReplicaCAD dataset.',
         },
       },
       coordinateSystem: {
+        // GLTFast converts GLTF right-hand → Unity left-hand internally.
+        // The payload must declare the already-normalised Unity space.
         unit: 'meter',
         handedness: 'left',
         upAxis: '+Y',
@@ -112,23 +118,28 @@ export const createMockRoomPayload = () =>
         },
       },
       mesh: {
-        uri: 'https://assets.room2scan.dev/replica/v1/room0/room0_mesh.glb',
+        // Windows absolute path — RoomManager.NormalizeMeshUri converts to file:// URI.
+        uri: `${REPLICA_CAD_ROOT}\\stages\\frl_apartment_stage.glb`,
         format: 'glb',
       },
+      // These two extra fields are read by UnityBridge to auto-place scene objects.
+      sceneInstancePath: `${REPLICA_CAD_ROOT}\\configs\\scenes\\apt_0.scene_instance.json`,
+      objectsBasePath:   `${REPLICA_CAD_ROOT}\\objects`,
       bounds: {
-        min: { x: -0.8794, y: 0, z: -1.186 },
-        max: { x:  6.8852, y: 2.8078, z: 3.5123 },
+        // Approximate bounds for frl_apartment (metres, Unity/GLTF-loaded space).
+        min: { x: -5.5, y:  0.0, z: -1.5 },
+        max: { x:  5.5, y:  3.2, z:  8.5 },
       },
       placement: {
         floorPolygons: [
           {
-            id: 'floor_aabb_room0',
+            id: 'floor_apt0',
             elevationY: 0,
             points: [
-              { x: -0.8794, z: -1.186  },
-              { x:  6.8852, z: -1.186  },
-              { x:  6.8852, z:  3.5123 },
-              { x: -0.8794, z:  3.5123 },
+              { x: -5.5, z: -1.5 },
+              { x:  5.5, z: -1.5 },
+              { x:  5.5, z:  8.5 },
+              { x: -5.5, z:  8.5 },
             ],
           },
         ],
