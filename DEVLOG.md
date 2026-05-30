@@ -1,7 +1,7 @@
 # Room2Scan 개발 야간 자동화 로그
 
 > 이 파일은 Claude가 자동으로 업데이트합니다.  
-> 마지막 업데이트: 자동화 세션 완료
+> 마지막 업데이트: 2026-05-31 세션 완료
 
 ---
 
@@ -20,6 +20,10 @@
 | P4: UnityBridge.cs 핸들러 추가 | ✅ 완료 | ✓ |
 | P4: expo-camera 실제 카메라 프리뷰 | ✅ 완료 | ✓ |
 | P4: 카메라 권한 흐름 (iOS/Android) | ✅ 완료 | ✓ |
+| P4: CustomRoom AsyncStorage 저장 (roomStorage.ts) | ✅ 완료 | ✓ |
+| P4: MyRoomsScreen 동적 커스텀 방 목록 | ✅ 완료 | ✓ |
+| P4: 커스텀 방 재진입 (saveRoomSpec / loadRoomSpec) | ✅ 완료 | ✓ |
+| P4: LayoutSaved → refreshFurnitureCount 연결 | ✅ 완료 | ✓ |
 
 ---
 
@@ -136,29 +140,60 @@ adb install app\build\outputs\apk\debug\app-debug.apk
 
 ---
 
-## 커밋 히스토리 (오늘 밤)
-<!-- 커밋 완료 후 자동 추가 -->
-- [ ] room2scan_app: P2+P3+P4 코드 커밋 예정
-- [ ] room2scan_unity: ProceduralRoomBuilder + UnityBridge 업데이트 커밋 예정
+## 커밋 히스토리
+
+| 커밋 | 내용 |
+|------|------|
+| `f9eb8b0` | P2+P3+P4: BUILD_GUIDE, unity.local.properties, AndroidManifest, layoutStorage, UnityEditorScreen 저장/복원, RoomSetupScreen, CreateProceduralRoom bridge, PanoramaCameraScreen expo-camera |
+| `08cc62f` | P4: custom room storage (roomStorage.ts) + MyRoomsScreen 동적 목록 |
+| `9dfda66` | P4: 커스텀 방 재진입 (saveRoomSpec/loadRoomSpec) + refreshFurnitureCount 연결 |
+
+---
+
+## 추가 완료된 항목 (컨텍스트 이어서)
+
+### roomStorage.ts (신규)
+- `CustomRoom` 인터페이스 + AsyncStorage CRUD (`saveCustomRoom`, `loadCustomRoom`, `loadAllCustomRooms`, `deleteCustomRoom`, `refreshFurnitureCount`)
+- `saveRoomSpec(id, ProceduralRoomOptions)` / `loadRoomSpec(id)` — 커스텀 방 spec 별도 저장
+  - 저장 키: `@room2scan:roomSpec:<id>`
+  - `deleteCustomRoom`이 spec도 함께 삭제
+
+### MyRoomsScreen.tsx (업데이트)
+- `useEffect` → `loadAllCustomRooms()` on mount
+- `CustomRoomCard` 컴포넌트: 색상 배너 + 2D 평면도 아웃라인 + 타입 배지 + 치수 텍스트
+- 커스텀 방(최신순) → 구분선 → 샘플 방(MY_ROOMS) 순서로 렌더
+- 빈 상태 UI, ActivityIndicator 로딩
+
+### UnityEditorScreen.tsx (업데이트)
+- 마운트 `useEffect`: `roomId?.startsWith('custom_')` 감지 → `loadRoomSpec` → `createProceduralRoomPayload` 전송
+- `simulateUnityResponse`: `CreateProceduralRoom` 케이스 추가 (ProceduralRoomCreated + RoomLoaded)
+- `LayoutSaved` 핸들러: 레이아웃 저장 후 `refreshFurnitureCount(roomId)` 호출
+- `SimulationFloorPlan`: 커스텀 방은 placeholder (이름 + 면적, furniture: []) 사용
 
 ---
 
 ## 알려진 한계 및 다음 단계
 
-### 현재 세션에서 하지 못한 것 (다음 세션 TODO)
+### 해결된 TODO
+- ✅ 커스텀 방 에디터 재진입 — `saveRoomSpec` + `loadRoomSpec`으로 해결
+- ✅ 방 목록에 커스텀 방 표시 — `MyRoomsScreen` 동적 로드로 해결
+- ✅ `refreshFurnitureCount` — `LayoutSaved` 핸들러에서 호출
 
-1. **커스텀 방 에디터 재진입** — `custom_*` roomId로 에디터 재진입 시 ProceduralRoom을 재빌드해야 함.
-   현재: `createMockRoomPayload()`(apt_0)를 로드함 → 나중에 AsyncStorage에 spec 저장하고 재사용 필요.
+### 아직 남은 TODO (다음 세션)
 
-2. **방 목록에 커스텀 방 표시** — `MY_ROOMS`(하드코딩)에 커스텀 방이 추가되지 않음.
-   필요: AsyncStorage 기반 동적 방 목록 (MyRoomsScreen에서 로드).
+1. **ARCore 실제 측정** — 현재 치수는 수동 입력. ARCore로 실제 방 치수 자동 측정 미구현.
 
-3. **ARCore 실제 측정** — 현재 치수는 수동 입력. ARCore로 실제 방 치수 자동 측정 미구현.
-
-4. **가구 StreamingAssets 번들링** — Android 기기에서 GLB 로드하려면 APK에 포함 필요.
+2. **가구 StreamingAssets 번들링** — Android 기기에서 GLB 로드하려면 APK에 포함 필요.
    현재: Windows 절대경로 (Unity Editor 전용).
 
-5. **Undo/Redo 스택** — UnityBridge에 TODO로 남아있음.
+3. **Undo/Redo 스택** — UnityBridge에 TODO로 남아있음.
+
+4. **커스텀 방 삭제 UI** — `MyRoomsScreen`에서 스와이프-삭제 또는 롱프레스 삭제 미구현.
+   `deleteCustomRoom(id)` 함수는 있음.
+
+5. **방 이름 편집** — 에디터 헤더에서 방 이름 인라인 편집 미구현.
+
+6. **P5: ARCore 스캔 파이프라인** — PanoramaCameraScreen → depth 데이터 → 자동 치수 추출.
 
 ---
 
