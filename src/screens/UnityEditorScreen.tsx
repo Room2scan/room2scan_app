@@ -46,7 +46,7 @@ import {
   EditorToolId,
 } from '../bridge/unityBridge';
 import { ALL_FURNITURE, MY_ROOMS } from '../data';
-import { FurnitureItem } from '../types';
+import { FurnitureItem, RoomProject } from '../types';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const PRIMARY       = '#4A3AFF';
@@ -149,6 +149,14 @@ export const UnityEditorScreen = ({
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | null>(null);
   const [addedInstanceIds, setAddedInstanceIds]     = useState<string[]>([]);
 
+  // ── Unity connection tracking ─────────────────────────────────────────────
+  // true once Unity sends back a successful RoomLoaded event.
+  // When false (native Unity present but no response in 4 s) we fall back to
+  // the 2-D simulation floor-plan overlay.
+  const [unityConnected, setUnityConnected] = useState(false);
+  const unityFallbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingLoadRoomCmd = useRef<UnityBridgeEnvelope | null>(null);
+
   // ── Editor-mode state (mirrored in Unity) ─────────────────────────────────
   const [viewMode,    setViewMode]    = useState<'2D' | '3D'>('3D');
   const [snapEnabled, setSnapEnabled] = useState(false);
@@ -224,6 +232,18 @@ export const UnityEditorScreen = ({
   /** Parse an incoming Unity event and update the relevant UI state. */
   const handleUnityEvent = (name: string, payload: Record<string, any>) => {
     switch (name) {
+
+      case 'RoomLoaded': {
+        // Unity confirmed the room loaded — cancel fallback timer, reveal 3-D view.
+        if (payload.success) {
+          setUnityConnected(true);
+          if (unityFallbackTimer.current) {
+            clearTimeout(unityFallbackTimer.current);
+            unityFallbackTimer.current = null;
+          }
+        }
+        break;
+      }
 
       case 'FurnitureAdded': {
         const { instanceId, success, position, rotationYDeg = 0, scale = 0.8, catalogId, isDuplicate } = payload;
@@ -526,7 +546,23 @@ export const UnityEditorScreen = ({
     addLog('RN → Unity', cmd.name, msg);
     if (UnityView && unityRef.current) {
       unityRef.current.postMessage(UNITY_GAME_OBJECT, UNITY_RECEIVE_METHOD, msg);
+
+      // For LoadRoom: start a 4-second window to hear back from Unity.
+      // If Unity doesn't respond (e.g. GLB path inaccessible on device), we
+      // activate simulation mode so the screen stays useful.
+      if (cmd.name === 'LoadRoom') {
+        pendingLoadRoomCmd.current = cmd;
+        if (unityFallbackTimer.current) clearTimeout(unityFallbackTimer.current);
+        unityFallbackTimer.current = setTimeout(() => {
+          if (pendingLoadRoomCmd.current) {
+            // Trigger the full simulation path as if Unity answered
+            simulateUnityResponse(pendingLoadRoomCmd.current);
+            pendingLoadRoomCmd.current = null;
+          }
+        }, 4000);
+      }
     } else {
+      // No native Unity view — pure simulation
       simulateUnityResponse(cmd);
     }
   };
@@ -637,6 +673,13 @@ export const UnityEditorScreen = ({
     setObjectCatalogIds({});
     furnitureCounter = 0;
   };
+
+  // Cleanup fallback timer on unmount
+  useEffect(() => {
+    return () => {
+      if (unityFallbackTimer.current) clearTimeout(unityFallbackTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     // Find the room project matching the passed roomId.
@@ -1057,15 +1100,25 @@ export const UnityEditorScreen = ({
 
       {/* Unity view or placeholder — full screen, z=0 */}
       <View style={[StyleSheet.absoluteFill, { zIndex: 0 }]}>
-        {UnityView ? (
+        {/* Native Unity player (only when module is available) */}
+        {UnityView && (
           <UnityView
             ref={unityRef}
             style={StyleSheet.absoluteFill}
             fullScreen
             onUnityMessage={(e: UnityMessageEvent) => receiveFromUnity(e.nativeEvent.message)}
           />
-        ) : (
-          <ViewportPlaceholder />
+        )}
+
+        {/* 2-D simulation floor plan:
+            – always shown when no native Unity module (Expo Go / web)
+            – shown on top of Unity while we wait for RoomLoaded confirmation
+            – hidden (opacity 0) once Unity confirms the room is rendered        */}
+        {!unityConnected && (
+          <SimulationFloorPlan
+            room={MY_ROOMS.find(r => r.id === roomId) ?? MY_ROOMS[0]}
+            isConnecting={!!UnityView}
+          />
         )}
       </View>
 
@@ -1205,46 +1258,147 @@ export const UnityEditorScreen = ({
   );
 };
 
-// ─── Viewport placeholder (no Unity) ─────────────────────────────────────────
-function ViewportPlaceholder() {
+// ─── Simulation floor plan ────────────────────────────────────────────────────
+// Shown when Unity isn't connected (Expo Go, simulator without GLB files).
+// Renders the room's actual furniture data as a 2-D top-down floor plan.
+// When isConnecting=true, a "connecting…" badge is overlaid to indicate
+// the native Unity player IS present but the room hasn't loaded yet.
+function SimulationFloorPlan({
+  room,
+  isConnecting = false,
+}: {
+  room: RoomProject;
+  isConnecting?: boolean;
+}) {
+  // Floor plan lives in the upper portion of the screen; match the Unity viewport area
+  const { width: W, height: H } = Dimensions.get('window');
+  const FP_PAD = 28;          // padding inside the plan frame
+  const FP_W   = W - FP_PAD * 2;
+  const FP_H   = Math.round(FP_W * 1.05); // slightly taller than wide (portrait room)
+  const FP_TOP = Math.round(H * 0.06);    // leave space for the fixed header
+
+  // Convert furniture's (x%,y%) → SVG pixel coords inside the frame
+  const px = (xPct: number) => (xPct / 100) * FP_W;
+  const py = (yPct: number) => (yPct / 100) * FP_H;
+
+  // Colour palette for furniture dots
+  const DOT_COLORS = ['#C7D2FE', '#BBF7D0', '#FDE68A', '#FECACA', '#E9D5FF', '#BAE6FD'];
+
   return (
-    <View style={StyleSheet.absoluteFill}>
-      <Svg
-        style={StyleSheet.absoluteFill}
-        viewBox="0 0 393 812"
-        preserveAspectRatio="xMidYMid slice"
-      >
+    <View style={[StyleSheet.absoluteFill, sim.container]}>
+      {/* Grid background */}
+      <Svg style={StyleSheet.absoluteFill} viewBox={`0 0 ${W} ${H}`}>
         <Defs>
-          <Pattern
-            id="isogrid" x="0" y="0" width="28" height="28"
-            patternUnits="userSpaceOnUse"
-            patternTransform="skewX(-30) scale(1,0.55)"
-          >
-            <Path d="M 28 0 L 0 0 0 28" fill="none" stroke="#C9D3E2" strokeWidth="1" />
+          <Pattern id="fpgrid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+            <Path d="M 24 0 L 0 0 0 24" fill="none" stroke="#E2E8F0" strokeWidth="0.8" />
           </Pattern>
         </Defs>
-        <Rect width="393" height="812" fill="url(#isogrid)" opacity="0.4" />
-        <Polygon points="96,440 196,480 296,440 196,400" fill="#E8C9A8" stroke="#A88560" strokeWidth="1.5" />
-        <Polygon points="96,440 196,400 196,250 96,290"  fill="#EFEBE3" stroke="#9F9786" strokeWidth="1.5" />
-        <Polygon points="296,440 196,400 196,250 296,290" fill="#E6E0D4" stroke="#9F9786" strokeWidth="1.5" />
-        <Rect x="170" y="415" width="52" height="22" rx="3"
-          fill="none" stroke={PRIMARY} strokeWidth="1.5" strokeDasharray="3,2" />
+        <Rect width={W} height={H} fill="url(#fpgrid)" />
       </Svg>
-      <View style={{ position: 'absolute', top: '37%', left: '26%' }}>
-        <View style={ph.tag}><Text style={ph.text}>4.62m</Text></View>
+
+      {/* Floor plan frame */}
+      <View style={[sim.planFrame, { top: FP_TOP, left: FP_PAD, width: FP_W, height: FP_H }]}>
+        {/* Room outline */}
+        <Svg width={FP_W} height={FP_H} viewBox={`0 0 ${FP_W} ${FP_H}`}>
+          {/* Floor fill */}
+          <Rect x="0" y="0" width={FP_W} height={FP_H} fill="#F8F9FB" rx="4" />
+          {/* Walls */}
+          <Rect x="0" y="0" width={FP_W} height={FP_H} fill="none"
+            stroke="#94A3B8" strokeWidth="3" rx="4" />
+          {/* Door hint (bottom-left) */}
+          <Path
+            d={`M ${Math.round(FP_W * 0.1)} ${FP_H} A ${Math.round(FP_W * 0.1)} ${Math.round(FP_W * 0.1)} 0 0 1 ${Math.round(FP_W * 0.1)} ${Math.round(FP_H - FP_W * 0.1)}`}
+            fill="none" stroke="#94A3B8" strokeWidth="1.5" strokeDasharray="4,3"
+          />
+
+          {/* Furniture dots */}
+          {room.furniture.map((item, i) => {
+            const cx = px(item.x);
+            const cy = py(item.y);
+            const r  = 10;
+            const col = DOT_COLORS[i % DOT_COLORS.length];
+            return (
+              <React.Fragment key={item.id}>
+                {/* Dot */}
+                <Rect
+                  x={cx - r} y={cy - r} width={r * 2} height={r * 2}
+                  rx={4} fill={col} stroke="#CBD5E1" strokeWidth="1"
+                />
+              </React.Fragment>
+            );
+          })}
+        </Svg>
+
+        {/* Furniture emoji labels — rendered as RN views so emoji font works */}
+        {room.furniture.map((item, i) => (
+          <View
+            key={item.id}
+            style={[sim.emojiDot, { left: px(item.x) - 10, top: py(item.y) - 12 }]}
+            pointerEvents="none"
+          >
+            <Text style={sim.emoji}>{item.thumbnail}</Text>
+          </View>
+        ))}
+
+        {/* Room area badge */}
+        <View style={sim.areaBadge}>
+          <Text style={sim.areaBadgeText}>{room.name}  {room.area}</Text>
+        </View>
       </View>
-      <View style={{ position: 'absolute', top: '37%', right: '26%' }}>
-        <View style={ph.tag}><Text style={ph.text}>3.85m</Text></View>
+
+      {/* Status badge */}
+      <View style={sim.statusBadge}>
+        <View style={[sim.dot, { backgroundColor: isConnecting ? '#FBBF24' : '#94A3B8' }]} />
+        <Text style={sim.statusText}>
+          {isConnecting ? 'Unity 연결 중…' : '시뮬레이션 모드'}
+        </Text>
       </View>
-      <View style={{ position: 'absolute', top: '47%', right: '10%' }}>
-        <View style={ph.tag}><Text style={ph.text}>2.70m</Text></View>
+
+      {/* Hint */}
+      <View style={sim.hint}>
+        <Text style={sim.hintText}>
+          {isConnecting
+            ? '3D 뷰 로딩 중 — GLB 경로가 기기에서 접근 가능한지 확인하세요'
+            : '네이티브 빌드에서 Unity 3D 뷰가 표시됩니다'}
+        </Text>
       </View>
     </View>
   );
 }
-const ph = StyleSheet.create({
-  tag:  { paddingHorizontal: 6, paddingVertical: 2, backgroundColor: 'rgba(255,255,255,0.84)', borderRadius: 4 },
-  text: { fontSize: 10, color: N500 },
+
+const sim = StyleSheet.create({
+  container:   { backgroundColor: '#F1F5F9' },
+  planFrame:   {
+    position: 'absolute',
+    borderRadius: 8,
+    overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08, shadowRadius: 8, elevation: 4,
+  },
+  emojiDot:    { position: 'absolute', width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
+  emoji:       { fontSize: 11 },
+  areaBadge:   {
+    position: 'absolute', bottom: 6, right: 8,
+    backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 6,
+    paddingHorizontal: 8, paddingVertical: 3,
+  },
+  areaBadgeText: { fontSize: 10, fontWeight: '600', color: '#334155' },
+  statusBadge: {
+    position: 'absolute', top: 12, right: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 999,
+    paddingHorizontal: 10, paddingVertical: 4,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08, shadowRadius: 3, elevation: 2,
+  },
+  dot:         { width: 6, height: 6, borderRadius: 3 },
+  statusText:  { fontSize: 11, fontWeight: '600', color: '#475569' },
+  hint:        {
+    position: 'absolute', bottom: 20, left: 20, right: 20,
+    backgroundColor: 'rgba(255,255,255,0.88)', borderRadius: 10,
+    paddingHorizontal: 14, paddingVertical: 8, alignItems: 'center',
+  },
+  hintText:    { fontSize: 11, color: '#64748B', textAlign: 'center', lineHeight: 16 },
 });
 
 // ─── StyleSheet ───────────────────────────────────────────────────────────────

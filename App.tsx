@@ -11,6 +11,7 @@ import { RoomDetailScreen } from './src/screens/RoomDetailScreen';
 import { PanoramaCameraScreen } from './src/screens/PanoramaCameraScreen';
 import { ReconstructionScreen } from './src/screens/ReconstructionScreen';
 import { UnityEditorScreen } from './src/screens/UnityEditorScreen';
+import { SplashScreen } from './src/screens/SplashScreen';
 import { SnackbarContainer } from './src/components/Shared';
 
 import { AppState, MainTab, SnackbarItem } from './src/types';
@@ -18,6 +19,7 @@ import { AppState, MainTab, SnackbarItem } from './src/types';
 // ─── Root App ─────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false);
   const [appState, setAppState] = useState<AppState>('home');
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [selectedRoomId, setSelectedRoomId] = useState<string>('r1');
@@ -124,6 +126,8 @@ export default function App() {
         <View style={styles.watermark} pointerEvents="none">
           <Text style={styles.watermarkText}>Scan2Room v1.0</Text>
         </View>
+        {/* Splash – rendered on top; fades out automatically */}
+        {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
       </View>
     </SafeAreaProvider>
   );

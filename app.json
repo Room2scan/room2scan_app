@@ -5,7 +5,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/start.png",
     "splash": {
+      "image": "./assets/start.png",
+      "resizeMode": "cover",
       "backgroundColor": "#FBFBFE"
     },
     "ios": {
@@ -14,7 +17,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#4A3AFF"
+        "foregroundImage": "./assets/start.png",
+        "backgroundColor": "#FBFBFE"
       },
       "package": "com.scan2room.app"
     }

@@ -60,7 +60,12 @@ export const HomeScreen = ({
       {/* Fixed top bar */}
       <Animated.View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
         <Animated.View style={{ backgroundColor: 'rgba(251,251,254,1)', ...StyleSheet.absoluteFillObject, opacity: headerBgOpacity }} />
-        <Animated.Text style={[styles.feedTitle, { opacity: titleOpacity }]}>Feed</Animated.Text>
+        {/* Wordmark fades in on the white top-bar as banner collapses */}
+        <Animated.Image
+          source={require('../../assets/Room2scan.png')}
+          style={[styles.wordmarkTopBar, { opacity: titleOpacity }]}
+          resizeMode="contain"
+        />
         <View style={styles.topBarRight}>
           <TouchableOpacity style={styles.bellBtn} activeOpacity={0.8}>
             <Feather name="bell" size={16} color="#514F6E" />
@@ -87,9 +92,15 @@ export const HomeScreen = ({
           </Animated.View>
         ))}
 
-        {/* Brand label */}
+        {/* Brand label – wordmark overlaid on banner, fades out when scrolled */}
         <Animated.View style={[styles.brandLabel, { top: insets.top + 14, opacity: bannerOpacity }]}>
-          <Text style={styles.brandText}>Scan2Room</Text>
+          <View style={styles.wordmarkPill}>
+            <Image
+              source={require('../../assets/Room2scan.png')}
+              style={styles.wordmarkImg}
+              resizeMode="contain"
+            />
+          </View>
         </Animated.View>
 
         {/* Banner content */}
@@ -229,6 +240,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
   },
   feedTitle: { fontSize: 18, fontWeight: '700', color: '#170F49' },
+  // Room2scan wordmark – top bar (coloured background, fades in on scroll)
+  wordmarkTopBar: {
+    width: 130,
+    height: 18,
+  },
+  // Room2scan wordmark – banner overlay (white pill on dark image)
+  wordmarkPill: {
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  wordmarkImg: {
+    width: 116,
+    height: 15,
+  },
   topBarRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   bellBtn: {
     width: 36, height: 36, borderRadius: 18,
@@ -249,7 +281,6 @@ const styles = StyleSheet.create({
   bannerSlide: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   bannerImage: { width: '100%', height: '100%' },
   brandLabel: { position: 'absolute', left: 20, zIndex: 10 },
-  brandText: { color: '#fff', fontWeight: '700', fontSize: 15, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 },
   bannerContent: { position: 'absolute', bottom: 56, left: 0, right: 0, paddingHorizontal: 20 },
   bannerTag: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
