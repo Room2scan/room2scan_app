@@ -65,7 +65,7 @@ export default function App() {
       );
     }
     if (appState === 'editor') {
-      return <UnityEditorScreen onBack={goHome} />;
+      return <UnityEditorScreen onBack={goHome} roomId={selectedRoomId} />;
     }
     if (appState === 'roomDetail') {
       return (

@@ -84,19 +84,31 @@ export const createBridgeCommand = <TPayload extends Record<string, unknown>>(
 // ─── RN → Unity commands ──────────────────────────────────────────────────────
 
 // ─── ReplicaCAD local dataset paths ──────────────────────────────────────────
-// Adjust REPLICA_CAD_ROOT if the dataset lives elsewhere on the machine.
 const REPLICA_CAD_ROOT = 'E:\\unity\\replica_cad_data';
 
-/** LoadRoom — load the ReplicaCAD frl_apartment GLB + auto-place scene objects */
-export const createMockRoomPayload = () =>
+// ─── Shared room payload builder ──────────────────────────────────────────────
+
+export interface RoomPayloadOptions {
+  /** Unique room ID sent to Unity (e.g. 'replica_cad_apt_0') */
+  roomId: string;
+  /** Windows absolute path to stage GLB */
+  meshUri: string;
+  /** Windows absolute path to scene_instance.json (optional) */
+  sceneInstancePath?: string;
+  /** Windows absolute path to objects/ directory (optional) */
+  objectsBasePath?: string;
+}
+
+/** LoadRoom — load a ReplicaCAD GLB + auto-place scene objects */
+export const createRoomPayload = (opts: RoomPayloadOptions) =>
   createBridgeCommand('LoadRoom', {
     room: {
       schemaVersion: 'room-json/v1',
-      roomId: 'replica_cad_apt_0',
+      roomId: opts.roomId,
       source: {
         datasetName: 'replicacad',
         datasetVersion: 'v1',
-        sceneId: 'apt_0',
+        sceneId: opts.roomId,
         conversion: {
           tool: 'replicacad-glb-native',
           toolVersion: '1.0.0',
@@ -106,7 +118,7 @@ export const createMockRoomPayload = () =>
       },
       coordinateSystem: {
         // GLTFast converts GLTF right-hand → Unity left-hand internally.
-        // The payload must declare the already-normalised Unity space.
+        // Payload declares already-normalised Unity space.
         unit: 'meter',
         handedness: 'left',
         upAxis: '+Y',
@@ -118,22 +130,22 @@ export const createMockRoomPayload = () =>
         },
       },
       mesh: {
-        // Windows absolute path — RoomManager.NormalizeMeshUri converts to file:// URI.
-        uri: `${REPLICA_CAD_ROOT}\\stages\\frl_apartment_stage.glb`,
+        // Windows absolute path — RoomManager.NormalizeMeshUri → file:// URI.
+        uri: opts.meshUri,
         format: 'glb',
       },
-      // These two extra fields are read by UnityBridge to auto-place scene objects.
-      sceneInstancePath: `${REPLICA_CAD_ROOT}\\configs\\scenes\\apt_0.scene_instance.json`,
-      objectsBasePath:   `${REPLICA_CAD_ROOT}\\objects`,
+      // Extra fields read by UnityBridge to auto-place scene objects.
+      sceneInstancePath: opts.sceneInstancePath,
+      objectsBasePath:   opts.objectsBasePath,
       bounds: {
-        // Approximate bounds for frl_apartment (metres, Unity/GLTF-loaded space).
+        // Approximate bounds for frl_apartment (metres, post-GLTFast space).
         min: { x: -5.5, y:  0.0, z: -1.5 },
         max: { x:  5.5, y:  3.2, z:  8.5 },
       },
       placement: {
         floorPolygons: [
           {
-            id: 'floor_apt0',
+            id: `floor_${opts.roomId}`,
             elevationY: 0,
             points: [
               { x: -5.5, z: -1.5 },
@@ -147,6 +159,15 @@ export const createMockRoomPayload = () =>
       },
       extensions: {},
     },
+  });
+
+/** Convenience: loads apt_0 — used as fallback when no room is selected */
+export const createMockRoomPayload = () =>
+  createRoomPayload({
+    roomId:            'replica_cad_apt_0',
+    meshUri:           `${REPLICA_CAD_ROOT}\\stages\\frl_apartment_stage.glb`,
+    sceneInstancePath: `${REPLICA_CAD_ROOT}\\configs\\scenes\\apt_0.scene_instance.json`,
+    objectsBasePath:   `${REPLICA_CAD_ROOT}\\objects`,
   });
 
 /** SaveLayout — persist the current furniture layout */

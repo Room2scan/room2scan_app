@@ -116,50 +116,106 @@ export const ALL_FURNITURE: FurnitureItem[] = [
   { id: 'mf2', name: '원목 책상 (스캔)', type: 'Table', dimensions: '140×70 cm', price: '직접 스캔', thumbnail: '🪵', color: '#897FFF', isWishlisted: false, rating: 5.0, isMyFurniture: true },
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ReplicaCAD dataset root (same as unityBridge.ts constant)
+// ─────────────────────────────────────────────────────────────────────────────
+const RCA = 'E:\\unity\\replica_cad_data';
+const STAGE_GLB       = `${RCA}\\stages\\frl_apartment_stage.glb`;
+const OBJECTS_DIR     = `${RCA}\\objects`;
+
+// 2D furniture positions are derived from scene_instance.json translations:
+//   norm_x = (tx + 5.5) / 11 * 100   (room width  ≈ 11 m, x: −5.5 → 5.5)
+//   norm_y = (tz + 1.5) / 10 * 100   (room depth  ≈ 10 m, z: −1.5 → 8.5)
+
 export const MY_ROOMS: RoomProject[] = [
   {
-    id: 'r1', name: '안방', area: '12.4 m²', furnitureCount: 6, lastEdited: '2일 전',
-    gradient: 'from-[#4A3AFF]/20 to-[#897FFF]/10', meshColor: '#897FFF', isFeatured: true,
-    description: '아늑한 침실 공간. 침대와 수납장을 중심으로 편안하게 배치했어요.',
+    id: 'r1',
+    name: '안방',
+    area: '12.4 m²',
+    furnitureCount: 119,
+    lastEdited: '2일 전',
+    gradient: 'from-[#4A3AFF]/20 to-[#897FFF]/10',
+    meshColor: '#897FFF',
+    isFeatured: true,
+    description: 'ReplicaCAD apt_0 배치. 소파·러그·테이블·의자가 실제 3D 위치로 로드됩니다.',
     heroImage: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80',
     realPhotos: [
       'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=400&q=75',
       'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=400&q=75',
     ],
+    // apt_0 key objects — positions computed from scene_instance.json translations
     furniture: [
-      { id: 'rf1', name: '의자 1',    thumbnail: '🪑', dimensions: '-',       x: 20, y: 15, rotation: 0  },
-      { id: 'rf2', name: '캐비넷',    thumbnail: '🗄️', dimensions: '-',       x: 60, y: 20, rotation: 90 },
-      { id: 'rf3', name: '빈백',      thumbnail: '🫘', dimensions: '-',       x: 55, y: 55, rotation: 45 },
+      { id: 'rf1', name: '소파',        thumbnail: '🛋️', dimensions: '-', x: 86, y: 68, rotation: 90  },
+      { id: 'rf2', name: '테이블',      thumbnail: '🪵', dimensions: '-', x: 88, y: 81, rotation: 0   },
+      { id: 'rf3', name: '러그',        thumbnail: '🟫', dimensions: '-', x: 73, y: 71, rotation: 25  },
+      { id: 'rf4', name: '의자',        thumbnail: '🪑', dimensions: '-', x: 68, y: 90, rotation: 0   },
+      { id: 'rf5', name: '벽 캐비넷',   thumbnail: '🗄️', dimensions: '-', x: 88, y: 55, rotation: 90  },
+      { id: 'rf6', name: '실내 식물',   thumbnail: '🌿', dimensions: '-', x: 56, y: 60, rotation: 0   },
+      { id: 'rf7', name: '러그 2',      thumbnail: '🟫', dimensions: '-', x: 62, y: 38, rotation: 45  },
+      { id: 'rf8', name: '스툴',        thumbnail: '🪑', dimensions: '-', x: 87, y: 39, rotation: 0   },
     ],
+    // ── 3D scene ──────────────────────────────────────────────────────────────
+    glbPath:         STAGE_GLB,
+    sceneJsonPath:   `${RCA}\\configs\\scenes\\apt_0.scene_instance.json`,
+    objectsBasePath: OBJECTS_DIR,
   },
   {
-    id: 'r2', name: '거실', area: '24.1 m²', furnitureCount: 9, lastEdited: '1주일 전',
-    gradient: 'from-[#897FFF]/20 to-[#EAE8FF]/60', meshColor: '#4A3AFF', isFeatured: false,
-    description: '넓고 트인 거실. 소파와 TV 장을 중심으로 동선을 최적화했습니다.',
+    id: 'r2',
+    name: '거실',
+    area: '24.1 m²',
+    furnitureCount: 126,
+    lastEdited: '1주일 전',
+    gradient: 'from-[#897FFF]/20 to-[#EAE8FF]/60',
+    meshColor: '#4A3AFF',
+    isFeatured: false,
+    description: 'ReplicaCAD apt_1 배치. 소파·의자·테이블 등 126개 오브젝트가 실제 위치로 배치됩니다.',
     heroImage: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80',
     realPhotos: [
       'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400&q=75',
       'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=400&q=75',
     ],
+    // apt_1 key objects
     furniture: [
-      { id: 'rf4', name: '소파',      thumbnail: '🛋️', dimensions: '-', x: 25, y: 60, rotation: 0 },
-      { id: 'rf5', name: '테이블 1',  thumbnail: '🪵', dimensions: '-', x: 50, y: 45, rotation: 0 },
-      { id: 'rf6', name: '랙 선반',   thumbnail: '🗄️', dimensions: '-', x: 10, y: 20, rotation: 0 },
+      { id: 'rf1', name: '소파',        thumbnail: '🛋️', dimensions: '-', x: 86, y: 33, rotation: 90  },
+      { id: 'rf2', name: '의자',        thumbnail: '🪑', dimensions: '-', x: 55, y: 25, rotation: 210 },
+      { id: 'rf3', name: '러그',        thumbnail: '🟫', dimensions: '-', x: 65, y: 45, rotation: 0   },
+      { id: 'rf4', name: '테이블',      thumbnail: '🪵', dimensions: '-', x: 70, y: 55, rotation: 15  },
+      { id: 'rf5', name: '실내 식물',   thumbnail: '🌿', dimensions: '-', x: 30, y: 70, rotation: 0   },
+      { id: 'rf6', name: '램프',        thumbnail: '💡', dimensions: '-', x: 82, y: 60, rotation: 0   },
     ],
+    // ── 3D scene ──────────────────────────────────────────────────────────────
+    glbPath:         STAGE_GLB,
+    sceneJsonPath:   `${RCA}\\configs\\scenes\\apt_1.scene_instance.json`,
+    objectsBasePath: OBJECTS_DIR,
   },
   {
-    id: 'r3', name: '작업실', area: '8.2 m²', furnitureCount: 4, lastEdited: '3주일 전',
-    gradient: 'from-[#EAE8FF] to-[#D9DBE9]/60', meshColor: '#A0A3BD', isFeatured: false,
-    description: '집중할 수 있는 작업 공간. 책상과 선반으로 효율성을 높였습니다.',
+    id: 'r3',
+    name: '작업실',
+    area: '8.2 m²',
+    furnitureCount: 125,
+    lastEdited: '3주일 전',
+    gradient: 'from-[#EAE8FF] to-[#D9DBE9]/60',
+    meshColor: '#A0A3BD',
+    isFeatured: false,
+    description: 'ReplicaCAD apt_2 배치. 소파·테이블·램프 등 125개 오브젝트가 실제 위치로 배치됩니다.',
     heroImage: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800&q=80',
     realPhotos: [
       'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=400&q=75',
       'https://images.unsplash.com/photo-1547119957-637f8679db1e?w=400&q=75',
     ],
+    // apt_2 key objects
     furniture: [
-      { id: 'rf7', name: '원목 책상 (스캔)', thumbnail: '🪵', dimensions: '140×70 cm', x: 30, y: 30, rotation: 0 },
-      { id: 'rf8', name: '벽 캐비넷 1',      thumbnail: '🗄️', dimensions: '-',         x: 70, y: 15, rotation: 0 },
+      { id: 'rf1', name: '소파',        thumbnail: '🛋️', dimensions: '-', x: 85, y: 31, rotation: 90  },
+      { id: 'rf2', name: '테이블 2',    thumbnail: '🪵', dimensions: '-', x: 55, y: 30, rotation: 90  },
+      { id: 'rf3', name: '테이블 4',    thumbnail: '🪵', dimensions: '-', x: 75, y: 31, rotation: 0   },
+      { id: 'rf4', name: '램프',        thumbnail: '💡', dimensions: '-', x: 55, y: 71, rotation: 0   },
+      { id: 'rf5', name: '상자',        thumbnail: '📦', dimensions: '-', x: 55, y: 61, rotation: 90  },
+      { id: 'rf6', name: '쓰레기통',    thumbnail: '🗑️', dimensions: '-', x: 45, y:  6, rotation: 0   },
     ],
+    // ── 3D scene ──────────────────────────────────────────────────────────────
+    glbPath:         STAGE_GLB,
+    sceneJsonPath:   `${RCA}\\configs\\scenes\\apt_2.scene_instance.json`,
+    objectsBasePath: OBJECTS_DIR,
   },
 ];
 

@@ -28,6 +28,7 @@ import {
   createDeleteSelectedPayload,
   createDuplicateSelectedPayload,
   createMockRoomPayload,
+  createRoomPayload,
   createMockUnityEvent,
   createRedoPayload,
   createResetEditorPayload,
@@ -44,7 +45,7 @@ import {
   serializeBridgeMessage,
   EditorToolId,
 } from '../bridge/unityBridge';
-import { ALL_FURNITURE } from '../data';
+import { ALL_FURNITURE, MY_ROOMS } from '../data';
 import { FurnitureItem } from '../types';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -127,7 +128,13 @@ const STRUCTURE_ITEMS: { label: string; count: number; icon: string }[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────────────────────
-export const UnityEditorScreen = ({ onBack }: { onBack: () => void }) => {
+export const UnityEditorScreen = ({
+  onBack,
+  roomId,
+}: {
+  onBack: () => void;
+  roomId?: string;
+}) => {
   const insets = useSafeAreaInsets();
   const { width: SW, height: SH } = Dimensions.get('window');
   const HEADER_H  = insets.top + 44;
@@ -631,7 +638,20 @@ export const UnityEditorScreen = ({ onBack }: { onBack: () => void }) => {
     furnitureCounter = 0;
   };
 
-  useEffect(() => { sendToUnity(createMockRoomPayload()); }, []);
+  useEffect(() => {
+    // Find the room project matching the passed roomId.
+    const room = roomId ? MY_ROOMS.find(r => r.id === roomId) : null;
+    const payload = room?.glbPath
+      ? createRoomPayload({
+          roomId:            `replica_cad_${room.id}`,
+          meshUri:           room.glbPath,
+          sceneInstancePath: room.sceneJsonPath,
+          objectsBasePath:   room.objectsBasePath,
+        })
+      : createMockRoomPayload(); // fallback: apt_0
+    sendToUnity(payload);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Derived data
