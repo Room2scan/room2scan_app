@@ -33,8 +33,8 @@ import {
   deserializeBridgeMessage,
   UNITY_GAME_OBJECT,
   UNITY_RECEIVE_METHOD,
-  createMockUnityEvent,
 } from '../bridge/unityBridge';
+import { saveCustomRoom } from '../utils/roomStorage';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -147,6 +147,18 @@ export const RoomSetupScreen = ({ onBack, onComplete }: RoomSetupScreenProps) =>
       duration: 2000,
       useNativeDriver: false,
     }).start();
+
+    // Persist the room to AsyncStorage regardless of Unity
+    saveCustomRoom({
+      id:          roomId,
+      name,
+      createdAt:   new Date().toISOString(),
+      lastEdited:  new Date().toISOString(),
+      type:        selectedPreset,
+      width:       parseFloat(width),
+      length:      parseFloat(length),
+      height:      parseFloat(height),
+    }).catch(e => console.warn('[RoomSetup] save failed:', e));
 
     if (UnityView && unityRef.current) {
       unityRef.current.postMessage(UNITY_GAME_OBJECT, UNITY_RECEIVE_METHOD, msg);
