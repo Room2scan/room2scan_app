@@ -24,10 +24,12 @@ import {
   UNITY_GAME_OBJECT,
   UNITY_RECEIVE_METHOD,
   UnityBridgeEnvelope,
+  ProceduralRoomOptions,
   createAddFurniturePayload,
   createDeleteSelectedPayload,
   createDuplicateSelectedPayload,
   createMockRoomPayload,
+  createProceduralRoomPayload,
   createRoomPayload,
   createMockUnityEvent,
   createRedoPayload,
@@ -48,6 +50,7 @@ import {
 import { ALL_FURNITURE, MY_ROOMS } from '../data';
 import { FurnitureItem, RoomProject } from '../types';
 import { saveLayout, loadLayout } from '../utils/layoutStorage';
+import { loadRoomSpec, refreshFurnitureCount } from '../utils/roomStorage';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const PRIMARY       = '#4A3AFF';
@@ -158,6 +161,9 @@ export const UnityEditorScreen = ({
   const unityFallbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingLoadRoomCmd  = useRef<UnityBridgeEnvelope | null>(null);
   const layoutRestoredRef   = useRef(false); // prevent double-restore per session
+
+  // ── Custom (procedural) room spec — loaded from AsyncStorage for re-entry ──
+  const [customRoomSpec, setCustomRoomSpec] = useState<ProceduralRoomOptions | null>(null);
 
   // ── Editor-mode state (mirrored in Unity) ─────────────────────────────────
   const [viewMode,    setViewMode]    = useState<'2D' | '3D'>('3D');
@@ -375,9 +381,14 @@ export const UnityEditorScreen = ({
         // Unity (or simulation) confirmed layout — persist to AsyncStorage
         const { layout } = payload;
         if (layout?.items) {
-          saveLayout(roomId ?? 'default', layout.items).catch(e =>
-            console.warn('[Editor] Failed to persist layout:', e)
-          );
+          saveLayout(roomId ?? 'default', layout.items)
+            .then(() => {
+              // Update the furniture count stored in the custom-room record
+              if (roomId?.startsWith('custom_')) {
+                refreshFurnitureCount(roomId).catch(() => undefined);
+              }
+            })
+            .catch(e => console.warn('[Editor] Failed to persist layout:', e));
         }
         break;
       }
@@ -405,6 +416,18 @@ export const UnityEditorScreen = ({
           createMockUnityEvent(cmd.requestId, 'RoomLoaded', { roomId: 'replica_room0', success: true })
         ));
         break;
+
+      case 'CreateProceduralRoom': {
+        // Simulate the two events Unity would send back
+        const p = cmd.payload as any;
+        receiveFromUnity(serializeBridgeMessage(
+          createMockUnityEvent(cmd.requestId, 'ProceduralRoomCreated', { roomId: p.roomId, success: true })
+        ));
+        receiveFromUnity(serializeBridgeMessage(
+          createMockUnityEvent(cmd.requestId, 'RoomLoaded', { roomId: p.roomId, success: true })
+        ));
+        break;
+      }
 
       case 'AddFurniture': {
         const p = (cmd.payload as any);
@@ -727,7 +750,22 @@ export const UnityEditorScreen = ({
   }, []);
 
   useEffect(() => {
-    // Find the room project matching the passed roomId.
+    // ── Custom (procedural) room ───────────────────────────────────────────
+    if (roomId?.startsWith('custom_')) {
+      loadRoomSpec(roomId).then(spec => {
+        if (spec) {
+          setCustomRoomSpec(spec);
+          sendToUnity(createProceduralRoomPayload(spec));
+        } else {
+          // Spec missing (shouldn't happen normally) — fall back to mock
+          console.warn('[Editor] No spec found for custom room:', roomId);
+          sendToUnity(createMockRoomPayload());
+        }
+      });
+      return;
+    }
+
+    // ── Preset GLB room ────────────────────────────────────────────────────
     const room = roomId ? MY_ROOMS.find(r => r.id === roomId) : null;
     const payload = room?.glbPath
       ? createRoomPayload({
@@ -1161,7 +1199,26 @@ export const UnityEditorScreen = ({
             – hidden (opacity 0) once Unity confirms the room is rendered        */}
         {!unityConnected && (
           <SimulationFloorPlan
-            room={MY_ROOMS.find(r => r.id === roomId) ?? MY_ROOMS[0]}
+            room={
+              // For custom rooms show a procedural placeholder; for presets
+              // use the real MY_ROOMS record (with heroImage, furniture dots…).
+              roomId?.startsWith('custom_') && customRoomSpec
+                ? ({
+                    id:             roomId,
+                    name:           customRoomSpec.name,
+                    area:           `${(customRoomSpec.width * customRoomSpec.length).toFixed(1)}㎡`,
+                    furniture:      [],   // no static furniture for procedural rooms
+                    heroImage:      '',
+                    realPhotos:     [],
+                    isFeatured:     false,
+                    glbPath:        '',
+                    sceneJsonPath:  '',
+                    objectsBasePath:'',
+                    lastEdited:     '',
+                    furnitureCount: 0,
+                  } as unknown as RoomProject)
+                : (MY_ROOMS.find(r => r.id === roomId) ?? MY_ROOMS[0])
+            }
             isConnecting={!!UnityView}
           />
         )}

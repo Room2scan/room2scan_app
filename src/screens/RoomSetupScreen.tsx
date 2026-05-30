@@ -34,7 +34,7 @@ import {
   UNITY_GAME_OBJECT,
   UNITY_RECEIVE_METHOD,
 } from '../bridge/unityBridge';
-import { saveCustomRoom } from '../utils/roomStorage';
+import { saveCustomRoom, saveRoomSpec } from '../utils/roomStorage';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -148,7 +148,7 @@ export const RoomSetupScreen = ({ onBack, onComplete }: RoomSetupScreenProps) =>
       useNativeDriver: false,
     }).start();
 
-    // Persist the room to AsyncStorage regardless of Unity
+    // Persist the room metadata and spec to AsyncStorage regardless of Unity
     saveCustomRoom({
       id:          roomId,
       name,
@@ -158,7 +158,11 @@ export const RoomSetupScreen = ({ onBack, onComplete }: RoomSetupScreenProps) =>
       width:       parseFloat(width),
       length:      parseFloat(length),
       height:      parseFloat(height),
-    }).catch(e => console.warn('[RoomSetup] save failed:', e));
+    }).catch(e => console.warn('[RoomSetup] saveCustomRoom failed:', e));
+
+    // Save spec separately so UnityEditorScreen can re-send CreateProceduralRoom
+    // when the user reopens this room without going through RoomSetupScreen.
+    saveRoomSpec(roomId, opts).catch(e => console.warn('[RoomSetup] saveRoomSpec failed:', e));
 
     if (UnityView && unityRef.current) {
       unityRef.current.postMessage(UNITY_GAME_OBJECT, UNITY_RECEIVE_METHOD, msg);
