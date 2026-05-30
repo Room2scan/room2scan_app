@@ -20,7 +20,8 @@ import { MainTab } from '../types';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface HomeScreenProps {
-  onAddRoom: () => void;
+  onAddRoom:  () => void;            // 치수 입력으로 새 방 만들기
+  onScanRoom?: () => void;           // 카메라 스캔으로 방 추가 (선택적)
   onOpenRoom: (roomId: string) => void;
   onTabChange: (t: MainTab) => void;
   onSnack: (msg: string, icon?: string) => void;
@@ -28,6 +29,7 @@ interface HomeScreenProps {
 
 export const HomeScreen = ({
   onAddRoom,
+  onScanRoom,
   onOpenRoom,
   onTabChange,
   onSnack,
@@ -156,14 +158,24 @@ export const HomeScreen = ({
               </TouchableOpacity>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll} contentContainerStyle={styles.hScrollContent}>
-              {/* Add room button */}
+              {/* Add room button — manual dimensions */}
               <TouchableOpacity onPress={onAddRoom} activeOpacity={0.8} style={styles.addRoomCard}>
                 <View style={styles.addRoomIcon}>
                   <Feather name="plus" size={18} color="#4A3AFF" />
                 </View>
-                <Text style={styles.addRoomTitle}>방 추가</Text>
-                <Text style={styles.addRoomSub}>촬영해서 추가</Text>
+                <Text style={styles.addRoomTitle}>새 방</Text>
+                <Text style={styles.addRoomSub}>치수 입력</Text>
               </TouchableOpacity>
+              {/* Scan room button — camera flow */}
+              {!!onScanRoom && (
+                <TouchableOpacity onPress={onScanRoom} activeOpacity={0.8} style={[styles.addRoomCard, { borderColor: '#E0EDFF' }]}>
+                  <View style={[styles.addRoomIcon, { backgroundColor: '#E0EDFF' }]}>
+                    <Feather name="camera" size={18} color="#2563EB" />
+                  </View>
+                  <Text style={[styles.addRoomTitle, { color: '#2563EB' }]}>스캔</Text>
+                  <Text style={styles.addRoomSub}>카메라</Text>
+                </TouchableOpacity>
+              )}
 
               {MY_ROOMS.map(room => (
                 <TouchableOpacity key={room.id} onPress={() => onOpenRoom(room.id)} activeOpacity={0.85} style={styles.roomCard}>

@@ -43,6 +43,7 @@ export type ObjectTransform = {
 
 export type BridgeEventName =
   | 'RoomLoaded'
+  | 'ProceduralRoomCreated'
   | 'LayoutSaved'
   | 'FurnitureAdded'
   | 'FurnitureSelected'
@@ -233,6 +234,54 @@ export const createResetEditorPayload = () =>
 /** LoadFurnitureCatalog — request catalog data for a given id */
 export const createLoadFurnitureCatalogPayload = (catalogId: string) =>
   createBridgeCommand('LoadFurnitureCatalog', { catalogId });
+
+// ─── P4: Procedural Room Creation ─────────────────────────────────────────────
+
+export interface DoorSpec {
+  wall:   'north' | 'south' | 'east' | 'west';
+  /** 0..1 offset along the wall */
+  offset: number;
+  width:  number;
+  height: number;
+}
+
+export interface WindowSpec {
+  wall:        'north' | 'south' | 'east' | 'west';
+  offset:      number;
+  width:       number;
+  height:      number;
+  sillHeight:  number;
+}
+
+export interface ProceduralRoomOptions {
+  roomId:        string;
+  name:          string;
+  /** metres */
+  width:         number;
+  /** metres */
+  length:        number;
+  /** metres */
+  height:        number;
+  wallThickness: number;
+  doors?:        DoorSpec[];
+  windows?:      WindowSpec[];
+}
+
+/**
+ * CreateProceduralRoom — ask Unity to build a room procedurally.
+ * Unity fires back ProceduralRoomCreated when done.
+ */
+export const createProceduralRoomPayload = (opts: ProceduralRoomOptions) =>
+  createBridgeCommand('CreateProceduralRoom', {
+    roomId:        opts.roomId,
+    name:          opts.name,
+    width:         opts.width,
+    length:        opts.length,
+    height:        opts.height,
+    wallThickness: opts.wallThickness,
+    doors:         opts.doors   ?? [],
+    windows:       opts.windows ?? [],
+  });
 
 // ─── Mock Unity event builder (simulation / testing) ─────────────────────────
 

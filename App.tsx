@@ -11,10 +11,12 @@ import { RoomDetailScreen } from './src/screens/RoomDetailScreen';
 import { PanoramaCameraScreen } from './src/screens/PanoramaCameraScreen';
 import { ReconstructionScreen } from './src/screens/ReconstructionScreen';
 import { UnityEditorScreen } from './src/screens/UnityEditorScreen';
+import { RoomSetupScreen } from './src/screens/RoomSetupScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { SnackbarContainer } from './src/components/Shared';
 
-import { AppState, MainTab, SnackbarItem } from './src/types';
+import { AppState as BaseAppState, MainTab, SnackbarItem } from './src/types';
+type AppState = BaseAppState | 'roomSetup';
 
 // ─── Root App ─────────────────────────────────────────────────────────────────
 
@@ -32,10 +34,14 @@ export default function App() {
     setTimeout(() => setSnacks(prev => prev.filter(s => s.id !== id)), 2800);
   }, []);
 
-  const goHome    = () => { setAppState('home'); setActiveTab('home'); };
-  const goCamera  = (mode: 'room' | 'furniture' = 'room') => { setCameraMode(mode); setAppState('camera'); };
-  const goProcess = () => setAppState('processing');
-  const goEditor  = () => setAppState('editor');
+  const [newRoomId,   setNewRoomId]   = useState<string>('r1');
+  const [newRoomName, setNewRoomName] = useState<string>('');
+
+  const goHome      = () => { setAppState('home'); setActiveTab('home'); };
+  const goCamera    = (mode: 'room' | 'furniture' = 'room') => { setCameraMode(mode); setAppState('camera'); };
+  const goProcess   = () => setAppState('processing');
+  const goEditor    = () => setAppState('editor');
+  const goRoomSetup = () => setAppState('roomSetup');
   const goRoomDetail = (id: string) => { setSelectedRoomId(id); setAppState('roomDetail'); };
 
   const handleTabChange = (tab: MainTab) => {
@@ -69,6 +75,19 @@ export default function App() {
     if (appState === 'editor') {
       return <UnityEditorScreen onBack={goHome} roomId={selectedRoomId} />;
     }
+    if (appState === 'roomSetup') {
+      return (
+        <RoomSetupScreen
+          onBack={goHome}
+          onComplete={(roomId, roomName) => {
+            setNewRoomId(roomId);
+            setNewRoomName(roomName);
+            setSelectedRoomId(roomId);
+            goEditor();
+          }}
+        />
+      );
+    }
     if (appState === 'roomDetail') {
       return (
         <RoomDetailScreen
@@ -85,7 +104,8 @@ export default function App() {
     if (activeTab === 'home') {
       return (
         <HomeScreen
-          onAddRoom={() => goCamera('room')}
+          onAddRoom={goRoomSetup}
+          onScanRoom={() => goCamera('room')}
           onOpenRoom={goRoomDetail}
           onTabChange={handleTabChange}
           onSnack={addSnack}

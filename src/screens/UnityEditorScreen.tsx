@@ -47,6 +47,7 @@ import {
 } from '../bridge/unityBridge';
 import { ALL_FURNITURE, MY_ROOMS } from '../data';
 import { FurnitureItem, RoomProject } from '../types';
+import { saveLayout, loadLayout } from '../utils/layoutStorage';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const PRIMARY       = '#4A3AFF';
@@ -155,7 +156,8 @@ export const UnityEditorScreen = ({
   // the 2-D simulation floor-plan overlay.
   const [unityConnected, setUnityConnected] = useState(false);
   const unityFallbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingLoadRoomCmd = useRef<UnityBridgeEnvelope | null>(null);
+  const pendingLoadRoomCmd  = useRef<UnityBridgeEnvelope | null>(null);
+  const layoutRestoredRef   = useRef(false); // prevent double-restore per session
 
   // ── Editor-mode state (mirrored in Unity) ─────────────────────────────────
   const [viewMode,    setViewMode]    = useState<'2D' | '3D'>('3D');
@@ -368,6 +370,17 @@ export const UnityEditorScreen = ({
       case 'ToolChanged':
         if (payload.toolId) setSelectedTool(payload.toolId as EditorToolId);
         break;
+
+      case 'LayoutSaved': {
+        // Unity (or simulation) confirmed layout — persist to AsyncStorage
+        const { layout } = payload;
+        if (layout?.items) {
+          saveLayout(roomId ?? 'default', layout.items).catch(e =>
+            console.warn('[Editor] Failed to persist layout:', e)
+          );
+        }
+        break;
+      }
     }
   };
 
@@ -673,6 +686,38 @@ export const UnityEditorScreen = ({
     setObjectCatalogIds({});
     furnitureCounter = 0;
   };
+
+  // ── Restore persisted layout once Unity confirms the room is loaded ──────
+  useEffect(() => {
+    if (!unityConnected || layoutRestoredRef.current) return;
+    layoutRestoredRef.current = true;
+
+    const roomKey = roomId ?? 'default';
+    loadLayout(roomKey).then(saved => {
+      if (!saved || saved.items.length === 0) return;
+      console.log(`[Editor] Restoring ${saved.items.length} furniture items for "${roomKey}"`);
+      saved.items.forEach(item => {
+        // Mirror state optimistically
+        setAddedInstanceIds(prev =>
+          prev.includes(item.instanceId) ? prev : [...prev, item.instanceId]
+        );
+        setObjectCatalogIds(prev => ({ ...prev, [item.instanceId]: item.catalogId }));
+        setObjectTransforms(prev => ({
+          ...prev,
+          [item.instanceId]: {
+            position:     item.position,
+            rotationYDeg: item.rotationYDeg,
+            scale:        item.scale,
+          },
+        }));
+        // Send to Unity so the 3D object is spawned at the saved position
+        sendToUnity(createAddFurniturePayload(item.instanceId, item.catalogId, item.position));
+      });
+    });
+  // sendToUnity is safe here: this effect captures the post-render closure
+  // where both unityRef and unityView are fully initialised.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unityConnected]);
 
   // Cleanup fallback timer on unmount
   useEffect(() => {

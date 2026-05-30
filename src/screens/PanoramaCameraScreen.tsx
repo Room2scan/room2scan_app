@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 
 type ScanPhase = 'idle' | 'scanning' | 'complete';
 type WarningType = 'tooFast' | 'offPath' | 'notLevel' | null;
@@ -59,6 +60,10 @@ export const PanoramaCameraScreen = ({
   const warningOpacity = useRef(new Animated.Value(0)).current;
 
   const modeConfig = MODE_LABELS[mode];
+
+  // ── Camera permissions ──────────────────────────────────────────────────
+  const [permission, requestPermission] = useCameraPermissions();
+  const cameraReady = permission?.granted ?? false;
 
   // Pulse animation for scan button
   useEffect(() => {
@@ -150,16 +155,51 @@ export const PanoramaCameraScreen = ({
 
   const progressBarWidth = progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] });
 
+  // ── Permission gate ─────────────────────────────────────────────────────
+  if (!permission) {
+    // Loading permissions
+    return <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <Text style={{ color: '#fff' }}>카메라 권한 확인 중...</Text>
+    </View>;
+  }
+  if (!permission.granted) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }]}>
+        <Feather name="camera-off" size={48} color="#fff" style={{ marginBottom: 20 }} />
+        <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 12, textAlign: 'center' }}>
+          카메라 권한이 필요해요
+        </Text>
+        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, textAlign: 'center', marginBottom: 28 }}>
+          방 스캔 및 가구 촬영을 위해 카메라 접근 권한을 허용해주세요.
+        </Text>
+        <TouchableOpacity onPress={requestPermission} activeOpacity={0.85}
+          style={{ backgroundColor: '#4A3AFF', borderRadius: 14, paddingHorizontal: 28, paddingVertical: 14 }}>
+          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>권한 허용</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onBack} style={{ marginTop: 16 }}>
+          <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>뒤로 가기</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* Camera viewfinder background */}
+      {/* Real camera viewfinder (expo-camera) */}
       <View style={styles.viewfinder}>
-        <LinearGradient
-          colors={['rgba(10,8,40,1)', 'rgba(20,14,60,1)']}
-          style={StyleSheet.absoluteFillObject}
-        />
-        {/* Ambient glow */}
-        <View style={styles.ambientGlow} />
+        {cameraReady ? (
+          <CameraView
+            style={StyleSheet.absoluteFillObject}
+            facing={'back' as CameraType}
+          />
+        ) : (
+          <LinearGradient
+            colors={['rgba(10,8,40,1)', 'rgba(20,14,60,1)']}
+            style={StyleSheet.absoluteFillObject}
+          />
+        )}
+        {/* Ambient glow overlay (semi-transparent so camera shows through) */}
+        {!cameraReady && <View style={styles.ambientGlow} />}
         {/* Grid overlay */}
         {scanPhase === 'scanning' && (
           <View style={[StyleSheet.absoluteFillObject, styles.gridOverlay]} pointerEvents="none">
