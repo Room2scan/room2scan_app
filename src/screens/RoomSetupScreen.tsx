@@ -35,6 +35,7 @@ import {
   UNITY_RECEIVE_METHOD,
 } from '../bridge/unityBridge';
 import { saveCustomRoom, saveRoomSpec } from '../utils/roomStorage';
+import { createRoom as apiCreateRoom } from '../utils/apiClient';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -149,20 +150,44 @@ export const RoomSetupScreen = ({ onBack, onComplete }: RoomSetupScreenProps) =>
     }).start();
 
     // Persist the room metadata and spec to AsyncStorage regardless of Unity
+    const w = parseFloat(width);
+    const l = parseFloat(length);
+    const h = parseFloat(height);
+
     saveCustomRoom({
       id:          roomId,
       name,
       createdAt:   new Date().toISOString(),
       lastEdited:  new Date().toISOString(),
       type:        selectedPreset,
-      width:       parseFloat(width),
-      length:      parseFloat(length),
-      height:      parseFloat(height),
+      width:       w,
+      length:      l,
+      height:      h,
     }).catch(e => console.warn('[RoomSetup] saveCustomRoom failed:', e));
 
     // Save spec separately so UnityEditorScreen can re-send CreateProceduralRoom
     // when the user reopens this room without going through RoomSetupScreen.
     saveRoomSpec(roomId, opts).catch(e => console.warn('[RoomSetup] saveRoomSpec failed:', e));
+
+    // Register room with backend (fire-and-forget — store image_id back to AsyncStorage)
+    apiCreateRoom(roomId, name, w, l, h)
+      .then(imageId => {
+        if (imageId != null) {
+          saveCustomRoom({
+            id:             roomId,
+            name,
+            createdAt:      new Date().toISOString(),
+            lastEdited:     new Date().toISOString(),
+            type:           selectedPreset,
+            width:          w,
+            length:         l,
+            height:         h,
+            backendImageId: imageId,
+          }).catch(() => undefined);
+          console.log(`[RoomSetup] Room registered with backend image_id=${imageId}`);
+        }
+      })
+      .catch(() => undefined); // backend failure must not break local flow
 
     if (UnityView && unityRef.current) {
       unityRef.current.postMessage(UNITY_GAME_OBJECT, UNITY_RECEIVE_METHOD, msg);

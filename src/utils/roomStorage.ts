@@ -13,7 +13,8 @@
  *     width:        number,     // metres
  *     length:       number,
  *     height:       number,
- *     furnitureCount: number,   // updated from layout storage
+ *     furnitureCount:  number,   // updated from layout storage
+ *     backendImageId?: number,   // backend image_id (null until synced)
  *   }
  */
 
@@ -24,15 +25,17 @@ import { ProceduralRoomOptions } from '../bridge/unityBridge';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface CustomRoom {
-  id:             string;
-  name:           string;
-  createdAt:      string;
-  lastEdited:     string;
-  type:           string;
-  width:          number;
-  length:         number;
-  height:         number;
-  furnitureCount: number;
+  id:              string;
+  name:            string;
+  createdAt:       string;
+  lastEdited:      string;
+  type:            string;
+  width:           number;
+  length:          number;
+  height:          number;
+  furnitureCount:  number;
+  /** Backend image_id returned by POST /images/upload. null until first backend sync. */
+  backendImageId?: number | null;
 }
 
 // ─── Keys ─────────────────────────────────────────────────────────────────────

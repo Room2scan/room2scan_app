@@ -60,7 +60,8 @@ export type BridgeEventName =
   | 'RedoResult'
   | 'EditorReset'
   | 'EditorError'
-  | 'FurnitureCatalogLoaded';
+  | 'FurnitureCatalogLoaded'
+  | 'CollisionStatus';   // P5-B: { instanceId, hasCollision }
 
 // ─── Factory helpers ──────────────────────────────────────────────────────────
 
@@ -226,6 +227,10 @@ export const createSetViewModePayload = (mode: '2D' | '3D') =>
 /** SetSnapEnabled — toggle floor-grid snapping */
 export const createSetSnapPayload = (enabled: boolean) =>
   createBridgeCommand('SetSnapEnabled', { enabled });
+
+/** MoveFurniture — move the selected item to an absolute world position (RN-driven) */
+export const createMoveFurniturePayload = (x: number, y: number, z: number) =>
+  createBridgeCommand('MoveFurniture', { x, y, z });
 
 /** ResetEditor — clear all furniture and reset the room */
 export const createResetEditorPayload = () =>

@@ -50,7 +50,8 @@ import {
 import { ALL_FURNITURE, MY_ROOMS } from '../data';
 import { FurnitureItem, RoomProject } from '../types';
 import { saveLayout, loadLayout } from '../utils/layoutStorage';
-import { loadRoomSpec, refreshFurnitureCount } from '../utils/roomStorage';
+import { loadRoomSpec, loadCustomRoom, refreshFurnitureCount } from '../utils/roomStorage';
+import { syncLayout as apiSyncLayout, PlacementItem } from '../utils/apiClient';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const PRIMARY       = '#4A3AFF';
@@ -378,17 +379,43 @@ export const UnityEditorScreen = ({
         break;
 
       case 'LayoutSaved': {
-        // Unity (or simulation) confirmed layout — persist to AsyncStorage
+        // Unity (or simulation) confirmed layout — persist to AsyncStorage + backend
         const { layout } = payload;
         if (layout?.items) {
           saveLayout(roomId ?? 'default', layout.items)
-            .then(() => {
+            .then(async () => {
               // Update the furniture count stored in the custom-room record
               if (roomId?.startsWith('custom_')) {
-                refreshFurnitureCount(roomId).catch(() => undefined);
+                await refreshFurnitureCount(roomId).catch(() => undefined);
+
+                // Sync to backend if we have a backendImageId
+                const room = await loadCustomRoom(roomId).catch(() => null);
+                if (room?.backendImageId != null) {
+                  const placements: PlacementItem[] = (layout.items as any[]).map((item: any) => ({
+                    instanceId: item.instanceId ?? '',
+                    catalogId:  item.catalogId  ?? '',
+                    x:          item.position?.x ?? 0,
+                    y:          item.position?.y ?? 0,
+                    z:          item.position?.z ?? 0,
+                    rotation:   item.rotationYDeg ?? 0,
+                  }));
+                  apiSyncLayout(room.backendImageId, placements)
+                    .catch(e => console.warn('[Editor] Backend sync failed:', e));
+                }
               }
             })
             .catch(e => console.warn('[Editor] Failed to persist layout:', e));
+        }
+        break;
+      }
+
+      case 'CollisionStatus': {
+        // Unity reports whether the dragged furniture overlaps walls/other furniture.
+        // RN can use this to show a warning badge — currently just logged.
+        const { instanceId: cid, hasCollision } = payload;
+        if (cid) {
+          console.log(`[Editor] CollisionStatus: ${cid} → ${hasCollision ? '⛔ collision' : '✅ clear'}`);
+          // Future: expose in UI state for a red/green indicator overlay
         }
         break;
       }
