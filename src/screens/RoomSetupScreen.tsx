@@ -117,7 +117,7 @@ export const RoomSetupScreen = ({ onBack, onComplete }: RoomSetupScreenProps) =>
   };
 
   const handleCreate = () => {
-    const name = roomName.trim() || ROOM_PRESETS.find(p => p.id === selectedPreset)?.label ?? '새 방';
+    const name = roomName.trim() || (ROOM_PRESETS.find(p => p.id === selectedPreset)?.label ?? '새 방');
     const roomId = `custom_${Date.now()}`;
 
     const opts: ProceduralRoomOptions = {

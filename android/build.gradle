@@ -37,6 +37,8 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
+        // expo-camera bundles cameraview 1.0.0 locally (JCenter is shut down)
+        maven { url "$rootDir/../node_modules/expo-camera/android/maven" }
         flatDir {
             dirs "${project(':unityLibrary').projectDir}/libs"
         }

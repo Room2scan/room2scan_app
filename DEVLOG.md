@@ -179,6 +179,13 @@ adb install app\build\outputs\apk\debug\app-debug.apk
 - ✅ 방 목록에 커스텀 방 표시 — `MyRoomsScreen` 동적 로드로 해결
 - ✅ `refreshFurnitureCount` — `LayoutSaved` 핸들러에서 호출
 
+### 이번 세션에서 추가 해결 (컨텍스트 재개 후)
+
+- ✅ **시뮬레이터 신택스에러 수정** — `RoomSetupScreen.tsx` 120번 줄: `||` 와 `??` 연산자 혼용 괄호 누락
+  - 에러: `'||' and '??' operations cannot be mixed without parentheses`
+  - 수정: `roomName.trim() || (ROOM_PRESETS.find(...)?.label ?? '새 방')`
+  - Gradle build.gradle에 `maven { url "$rootDir/../node_modules/expo-camera/android/maven" }` 추가로 cameraview-1.0.0 해결
+
 ### 아직 남은 TODO (다음 세션)
 
 1. **ARCore 실제 측정** — 현재 치수는 수동 입력. ARCore로 실제 방 치수 자동 측정 미구현.
