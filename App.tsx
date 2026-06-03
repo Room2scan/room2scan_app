@@ -15,6 +15,8 @@ import { RoomSetupScreen } from './src/screens/RoomSetupScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { SnackbarContainer } from './src/components/Shared';
 
+import { MY_ROOMS } from './src/data';
+import { RoomProject } from './src/types';
 import { AppState as BaseAppState, MainTab, SnackbarItem } from './src/types';
 type AppState = BaseAppState | 'roomSetup';
 
@@ -34,8 +36,14 @@ export default function App() {
     setTimeout(() => setSnacks(prev => prev.filter(s => s.id !== id)), 2800);
   }, []);
 
+  const [rooms, setRooms] = useState<RoomProject[]>(MY_ROOMS);
   const [newRoomId,   setNewRoomId]   = useState<string>('r1');
   const [newRoomName, setNewRoomName] = useState<string>('');
+
+  const handleDeleteRoom = useCallback((id: string) => {
+    setRooms(prev => prev.filter(r => r.id !== id));
+    addSnack('방이 삭제되었어요', '🗑️');
+  }, [addSnack]);
 
   const goHome      = () => { setAppState('home'); setActiveTab('home'); };
   const goCamera    = (mode: 'room' | 'furniture' = 'room') => { setCameraMode(mode); setAppState('camera'); };
@@ -96,6 +104,7 @@ export default function App() {
           onOpenEditor={goEditor}
           onScanFurniture={() => goCamera('furniture')}
           onSnack={addSnack}
+          onDeleteRoom={handleDeleteRoom}
         />
       );
     }
@@ -104,6 +113,7 @@ export default function App() {
     if (activeTab === 'home') {
       return (
         <HomeScreen
+          rooms={rooms}
           onAddRoom={goRoomSetup}
           onScanRoom={() => goCamera('room')}
           onOpenRoom={goRoomDetail}
@@ -115,6 +125,7 @@ export default function App() {
     if (activeTab === 'rooms') {
       return (
         <MyRoomsScreen
+          rooms={rooms}
           onOpenRoom={goRoomDetail}
           onAddRoom={goRoomSetup}
           onScanRoom={() => goCamera('room')}
@@ -145,7 +156,7 @@ export default function App() {
         <SnackbarContainer snacks={snacks} onDismiss={id => setSnacks(prev => prev.filter(s => s.id !== id))} />
         {/* Version watermark */}
         <View style={styles.watermark} pointerEvents="none">
-          <Text style={styles.watermarkText}>Scan2Room v1.0</Text>
+          <Text style={styles.watermarkText}>Scan2Room v2.0</Text>
         </View>
         {/* Splash – rendered on top; fades out automatically */}
         {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}

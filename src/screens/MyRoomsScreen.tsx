@@ -129,7 +129,7 @@ const StaticRoomCard = ({
     <View style={styles.imagesRow}>
       <View style={styles.heroImageWrap}>
         <Image
-          source={{ uri: room.heroImage }}
+          source={typeof room.heroImage === 'string' ? { uri: room.heroImage } : room.heroImage}
           style={StyleSheet.absoluteFillObject}
           resizeMode="cover"
         />
@@ -184,6 +184,7 @@ const StaticRoomCard = ({
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 interface MyRoomsScreenProps {
+  rooms?: (typeof MY_ROOMS)[number][];
   onOpenRoom: (roomId: string) => void;
   onAddRoom: () => void;
   onScanRoom?: () => void;
@@ -191,6 +192,7 @@ interface MyRoomsScreenProps {
 }
 
 export const MyRoomsScreen = ({
+  rooms = MY_ROOMS,
   onOpenRoom,
   onAddRoom,
   onScanRoom,
@@ -217,7 +219,7 @@ export const MyRoomsScreen = ({
     return () => { alive = false; };
   }, []);
 
-  const isEmpty = !loading && customRooms.length === 0 && MY_ROOMS.length === 0;
+  const isEmpty = !loading && customRooms.length === 0 && rooms.length === 0;
 
   return (
     <View style={styles.container}>
@@ -262,7 +264,7 @@ export const MyRoomsScreen = ({
             ))}
 
             {/* Divider between custom + preset rooms */}
-            {customRooms.length > 0 && MY_ROOMS.length > 0 && (
+            {customRooms.length > 0 && rooms.length > 0 && (
               <View style={styles.sectionDivider}>
                 <View style={styles.dividerLine} />
                 <Text style={styles.dividerLabel}>샘플 방</Text>
@@ -271,7 +273,7 @@ export const MyRoomsScreen = ({
             )}
 
             {/* Preset / static rooms */}
-            {MY_ROOMS.map(room => (
+            {rooms.map(room => (
               <StaticRoomCard
                 key={room.id}
                 room={room}

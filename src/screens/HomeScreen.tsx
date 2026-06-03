@@ -16,11 +16,12 @@ import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomNav } from '../components/Shared';
 import { HERO_BANNERS, MY_ROOMS, POPULAR_FURNITURE } from '../data';
-import { MainTab } from '../types';
+import { MainTab, RoomProject } from '../types';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface HomeScreenProps {
+  rooms?: RoomProject[];
   onAddRoom:  () => void;            // 치수 입력으로 새 방 만들기
   onScanRoom?: () => void;           // 카메라 스캔으로 방 추가 (선택적)
   onOpenRoom: (roomId: string) => void;
@@ -29,6 +30,7 @@ interface HomeScreenProps {
 }
 
 export const HomeScreen = ({
+  rooms = MY_ROOMS,
   onAddRoom,
   onScanRoom,
   onOpenRoom,
@@ -109,7 +111,7 @@ export const HomeScreen = ({
             key={banner.id}
             style={[styles.bannerSlide, { opacity: idx === activeBanner ? 1 : 0 }]}
           >
-            <Image source={{ uri: banner.imageUrl }} style={styles.bannerImage} resizeMode="cover" />
+            <Image source={typeof banner.imageUrl === 'string' ? { uri: banner.imageUrl } : banner.imageUrl} style={styles.bannerImage} resizeMode="cover" />
             <LinearGradient
               colors={[banner.overlayFrom, banner.overlayTo, 'rgba(0,0,0,0.55)']}
               locations={[0, 0.6, 1]}
@@ -172,10 +174,10 @@ export const HomeScreen = ({
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll} contentContainerStyle={styles.hScrollContent}>
 
-              {MY_ROOMS.map(room => (
+              {rooms.map(room => (
                 <TouchableOpacity key={room.id} onPress={() => onOpenRoom(room.id)} activeOpacity={0.85} style={styles.roomCard}>
                   <View style={styles.roomCardImage}>
-                    <Image source={{ uri: room.heroImage }} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+                    <Image source={typeof room.heroImage === 'string' ? { uri: room.heroImage } : room.heroImage} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
                     <LinearGradient colors={['transparent', 'rgba(0,0,0,0.5)']} style={StyleSheet.absoluteFillObject} />
                     {room.isFeatured && (
                       <View style={styles.featuredBadge}>

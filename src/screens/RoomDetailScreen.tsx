@@ -24,7 +24,10 @@ interface RoomDetailScreenProps {
   onOpenEditor: () => void;
   onScanFurniture: () => void;
   onSnack: (msg: string, icon?: string) => void;
+  onDeleteRoom?: (id: string) => void;
 }
+
+const imgSrc = (src: any) => (typeof src === 'string' ? { uri: src } : src);
 
 export const RoomDetailScreen = ({
   roomId,
@@ -32,6 +35,7 @@ export const RoomDetailScreen = ({
   onOpenEditor,
   onScanFurniture,
   onSnack,
+  onDeleteRoom,
 }: RoomDetailScreenProps) => {
   const insets = useSafeAreaInsets();
   const room = MY_ROOMS.find(r => r.id === roomId) ?? MY_ROOMS[0];
@@ -134,6 +138,15 @@ export const RoomDetailScreen = ({
           <TouchableOpacity onPress={() => setIsWishlisted(w => !w)} style={styles.iconBtn} activeOpacity={0.8}>
             <Feather name="heart" size={16} color={isWishlisted ? '#EF4444' : '#170F49'} />
           </TouchableOpacity>
+          {onDeleteRoom && (
+            <TouchableOpacity
+              onPress={() => { onDeleteRoom(roomId); onBack(); }}
+              style={styles.iconBtn}
+              activeOpacity={0.8}
+            >
+              <Feather name="trash-2" size={16} color="#EF4444" />
+            </TouchableOpacity>
+          )}
         </View>
       </Animated.View>
 
@@ -144,10 +157,24 @@ export const RoomDetailScreen = ({
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero */}
+        {/* Hero – photo grid: 1 large left / 2 small right */}
         <View style={{ height: HERO_HEIGHT }}>
           {viewMode === '2d' ? (
-            <Image source={{ uri: room.heroImage }} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+            <View style={styles.photoGrid}>
+              {/* Large photo */}
+              <View style={styles.photoGridLeft}>
+                <Image source={imgSrc(room.realPhotos[0] ?? room.heroImage)} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+              </View>
+              {/* Two stacked small photos */}
+              <View style={styles.photoGridRight}>
+                <View style={styles.photoGridSmall}>
+                  <Image source={imgSrc(room.realPhotos[1] ?? room.heroImage)} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+                </View>
+                <View style={[styles.photoGridSmall, { marginTop: 2 }]}>
+                  <Image source={imgSrc(room.realPhotos[2] ?? room.heroImage)} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+                </View>
+              </View>
+            </View>
           ) : (
             <View style={[StyleSheet.absoluteFillObject, styles.mock3D]}>
               <View style={styles.mock3DGrid}>
@@ -164,14 +191,8 @@ export const RoomDetailScreen = ({
             colors={['rgba(0,0,0,0.15)', 'transparent', 'rgba(251,251,254,1)']}
             locations={[0, 0.4, 1]}
             style={StyleSheet.absoluteFillObject}
+            pointerEvents="none"
           />
-
-          {/* Photo counter */}
-          {viewMode === '2d' && (
-            <View style={styles.photoCounter}>
-              <Text style={styles.photoCounterText}>1 / {1 + room.realPhotos.length}</Text>
-            </View>
-          )}
 
           {/* View mode toggle */}
           <Animated.View style={[styles.viewToggle, { opacity: heroOpacity }]}>
@@ -349,12 +370,9 @@ export const RoomDetailScreen = ({
           <LinearGradient colors={['#4A3AFF', '#6B5EFF', '#897FFF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.ctaBtnInner}>
             <View style={styles.ctaBtnLeft}>
               <View style={styles.ctaBtnIconWrap}>
-                <Feather name="box" size={20} color="#fff" />
+                <Feather name="edit-2" size={18} color="#fff" />
               </View>
-              <View>
-                <Text style={styles.ctaBtnTitle}>지금 배치해보기</Text>
-                <Text style={styles.ctaBtnSub}>3D 에디터로 가구를 자유롭게 배치하세요</Text>
-              </View>
+              <Text style={styles.ctaBtnTitle}>편집</Text>
             </View>
             <View style={styles.ctaBtnArrow}>
               <Feather name="chevron-right" size={18} color="#fff" />
@@ -442,6 +460,11 @@ export const RoomDetailScreen = ({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FBFBFE' },
+  // ── Photo grid (1 large left + 2 small right) ──────────────────────────────
+  photoGrid: { flex: 1, flexDirection: 'row', gap: 2, backgroundColor: '#000' },
+  photoGridLeft: { flex: 3, overflow: 'hidden', position: 'relative' },
+  photoGridRight: { flex: 2, flexDirection: 'column', gap: 0 },
+  photoGridSmall: { flex: 1, overflow: 'hidden', position: 'relative' },
   topBar: {
     position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

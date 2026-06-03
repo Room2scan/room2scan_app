@@ -1,6 +1,6 @@
 export type AppState = 'home' | 'camera' | 'cameraFurniture' | 'processing' | 'editor' | 'roomDetail';
 export type MainTab = 'home' | 'rooms' | 'catalog' | 'settings';
-export type CatalogCategory = 'wishlist' | 'sofa' | 'bed' | 'table' | 'shelf' | 'chair' | 'myFurniture';
+export type CatalogCategory = 'wishlist' | 'sofa' | 'bed' | 'table' | 'shelf' | 'chair' | 'myFurniture' | 'trend';
 export type ViewMode = '3d' | '2d';
 
 export interface FurnitureItem {
@@ -10,7 +10,7 @@ export interface FurnitureItem {
   dimensions: string;
   price: string;
   thumbnail: string;
-  imageUrl?: string;   // optional product photo URL
+  imageUrl?: any;      // optional product photo – string URL or require() result
   color: string;
   isWishlisted: boolean;
   rating: number;
@@ -37,8 +37,8 @@ export interface RoomProject {
   meshColor: string;
   isFeatured: boolean;
   furniture: RoomFurnitureItem[];
-  heroImage: string;
-  realPhotos: string[];
+  heroImage: any;      // string URL or require() result
+  realPhotos: any[];   // string URLs or require() results
   description: string;
   // ── 3D scene (ReplicaCAD) ──────────────────────────────────────────────────
   glbPath?: string;         // Local absolute path to room/stage GLB
