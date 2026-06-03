@@ -1361,11 +1361,7 @@ export const UnityEditorScreen = ({
 
           {/* Right controls */}
           <View style={s.vpRightControls} pointerEvents="auto">
-            <TouchableOpacity style={s.vpChip}>
-              <Feather name="eye" size={12} color={N700} />
-              <Text style={s.vpChipText}>뷰 모드</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+                        <TouchableOpacity
               style={[s.vpChip, snapEnabled && { backgroundColor: PRIMARY_LIGHT, borderColor: PRIMARY }]}
               onPress={handleSnapToggle}
             >
