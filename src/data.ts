@@ -119,9 +119,21 @@ export const ALL_FURNITURE: FurnitureItem[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 // ReplicaCAD dataset root (same as unityBridge.ts constant)
 // ─────────────────────────────────────────────────────────────────────────────
-const RCA = 'E:\\unity\\replica_cad_data';
-const STAGE_GLB       = `${RCA}\\stages\\frl_apartment_stage.glb`;
-const OBJECTS_DIR     = `${RCA}\\objects`;
+import { Platform } from 'react-native';
+
+// Android 에뮬레이터/기기는 /sdcard, Windows 개발은 로컬 경로
+const RCA = Platform.OS === 'android'
+  ? '/data/user/0/com.scan2room.app/files/replica_cad'
+  : 'E:\\unity\\replica_cad_data';
+
+const SEP = Platform.OS === 'android' ? '/' : '\\';
+const STAGE_GLB   = `${RCA}${SEP}stages${SEP}frl_apartment_stage.glb`;
+const OBJECTS_DIR = `${RCA}${SEP}objects`;
+const LOCAL_ROOM_ROOT = Platform.OS === 'android'
+  ? '/data/user/0/com.scan2room.app/files/room2scan_local_rooms/room1'
+  : 'C:\\Users\\park\\Downloads\\unity_delivery_room1_final (1)\\unity_delivery_room1_final';
+const LOCAL_ROOM_GLB = `${LOCAL_ROOM_ROOT}${SEP}unity_y_up${SEP}room${SEP}room1_empty_floor_wall.glb`;
+const LOCAL_ROOM_MANIFEST = `${LOCAL_ROOM_ROOT}${SEP}metadata${SEP}room1_unity_delivery_manifest.json`;
 
 // 2D furniture positions are derived from scene_instance.json translations:
 //   norm_x = (tx + 5.5) / 11 * 100   (room width  ≈ 11 m, x: −5.5 → 5.5)
@@ -131,8 +143,8 @@ export const MY_ROOMS: RoomProject[] = [
   {
     id: 'r1',
     name: '안방',
-    area: '12.4 m²',
-    furnitureCount: 119,
+    area: '2.8 m²',
+    furnitureCount: 12,
     lastEdited: '2일 전',
     gradient: 'from-[#4A3AFF]/20 to-[#897FFF]/10',
     meshColor: '#897FFF',
@@ -155,9 +167,9 @@ export const MY_ROOMS: RoomProject[] = [
       { id: 'rf8', name: '스툴',        thumbnail: '🪑', dimensions: '-', x: 87, y: 39, rotation: 0   },
     ],
     // ── 3D scene ──────────────────────────────────────────────────────────────
-    glbPath:         STAGE_GLB,
-    sceneJsonPath:   `${RCA}\\configs\\scenes\\apt_0.scene_instance.json`,
-    objectsBasePath: OBJECTS_DIR,
+    glbPath:              LOCAL_ROOM_GLB,
+    deliveryManifestPath: LOCAL_ROOM_MANIFEST,
+    objectsBasePath:      LOCAL_ROOM_ROOT,
   },
   {
     id: 'r2',
@@ -185,7 +197,7 @@ export const MY_ROOMS: RoomProject[] = [
     ],
     // ── 3D scene ──────────────────────────────────────────────────────────────
     glbPath:         STAGE_GLB,
-    sceneJsonPath:   `${RCA}\\configs\\scenes\\apt_1.scene_instance.json`,
+    sceneJsonPath:   `${RCA}${SEP}configs${SEP}scenes${SEP}apt_1.scene_instance.json`,
     objectsBasePath: OBJECTS_DIR,
   },
   {
@@ -214,7 +226,7 @@ export const MY_ROOMS: RoomProject[] = [
     ],
     // ── 3D scene ──────────────────────────────────────────────────────────────
     glbPath:         STAGE_GLB,
-    sceneJsonPath:   `${RCA}\\configs\\scenes\\apt_2.scene_instance.json`,
+    sceneJsonPath:   `${RCA}${SEP}configs${SEP}scenes${SEP}apt_2.scene_instance.json`,
     objectsBasePath: OBJECTS_DIR,
   },
 ];

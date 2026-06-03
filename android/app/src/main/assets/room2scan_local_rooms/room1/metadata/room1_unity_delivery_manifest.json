@@ -1,0 +1,982 @@
+{
+  "name": "room1_unity_delivery_final",
+  "coordinate_system": {
+    "type": "Unity y-up",
+    "unit": "meters, same scale as reconstruction",
+    "mapping_from_room_z_up": {
+      "unity_x": "room_x",
+      "unity_y": "room_z",
+      "unity_z": "-room_y"
+    }
+  },
+  "recommended_usage": {
+    "static_room": "Import unity_y_up/room/room1_empty_floor_wall.glb at identity.",
+    "movable_furniture": "Create one parent GameObject per furniture item. Set parent position to initial_transform.position, rotation to zero, scale to one. Put movable_asset_local_pivot_glb under that parent at local identity. Add BoxCollider to the parent with center_local and size from box_collider.",
+    "collision": "Use furniture BoxColliders for movable objects and wall BoxColliders for static collision. The floorplan_filled_mesh.glb can be used as visual guide or MeshCollider if needed."
+  },
+  "files": {
+    "room_empty_glb": "unity_y_up/room/room1_empty_floor_wall.glb",
+    "preview_room_assets_glb": "unity_y_up/previews/room1_empty_plus_assets_placed.glb",
+    "preview_layout_boxes_glb": "unity_y_up/previews/room1_floorplan_wall_boxes_furniture_boxes.glb",
+    "preview_room_assets_floorplan_glb": "unity_y_up/previews/room1_empty_plus_assets_with_floorplan.glb",
+    "furniture_boxes_csv": "metadata/furniture_boxes_unity_y_up.csv",
+    "wall_boxes_csv": "metadata/wall_boxes_unity_y_up.csv",
+    "floorplan_polygon_csv": "metadata/floorplan_polygon_unity_y_up.csv"
+  },
+  "floorplan": {
+    "image_png": "unity_y_up/floorplan/floorplan_straightened_topdown.png",
+    "outline_glb": "unity_y_up/floorplan/floorplan_outline.glb",
+    "filled_mesh_glb": "unity_y_up/floorplan/floorplan_filled_mesh.glb",
+    "polygon_unity_y_up": [
+      [
+        -0.0525,
+        0.0,
+        -0.21749999999999997
+      ],
+      [
+        -0.0525,
+        0.0,
+        -1.2074999999999998
+      ],
+      [
+        0.47250000000000003,
+        0.0,
+        -1.2074999999999998
+      ],
+      [
+        2.1525,
+        0.0,
+        -1.2074999999999998
+      ],
+      [
+        2.2125,
+        0.0,
+        -1.1025
+      ],
+      [
+        2.2125,
+        0.0,
+        -0.7575000000000001
+      ],
+      [
+        2.2125,
+        0.0,
+        -0.052500000000000005
+      ],
+      [
+        2.1225,
+        0.0,
+        0.012500000000000002
+      ],
+      [
+        0.8925,
+        0.0,
+        0.012500000000000002
+      ],
+      [
+        -0.0525,
+        0.0,
+        0.012500000000000002
+      ],
+      [
+        -0.0525,
+        0.0,
+        -0.21749999999999997
+      ]
+    ],
+    "area_source_room": 2.757225,
+    "perimeter_source_room": 6.881951882780351
+  },
+  "wall_boxes": [
+    {
+      "id": "wall_left",
+      "side_type": "x_min",
+      "bbox_glb": "unity_y_up/wall_boxes/wall_left_bbox.glb",
+      "box_collider": {
+        "center": [
+          -0.052500000000000005,
+          0.5008563101291656,
+          -0.5974999999999999
+        ],
+        "size": [
+          0.09,
+          1.0017126202583313,
+          1.2199999999999998
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          -0.0975,
+          0.0,
+          -1.2074999999999998
+        ],
+        "max": [
+          -0.0075,
+          1.0017126202583313,
+          0.012500000000000002
+        ],
+        "center": [
+          -0.052500000000000005,
+          0.5008563101291656,
+          -0.5974999999999999
+        ],
+        "size": [
+          0.09,
+          1.0017126202583313,
+          1.2199999999999998
+        ]
+      }
+    },
+    {
+      "id": "wall_right",
+      "side_type": "x_max",
+      "bbox_glb": "unity_y_up/wall_boxes/wall_right_bbox.glb",
+      "box_collider": {
+        "center": [
+          2.2125,
+          0.5008563101291656,
+          -0.5974999999999999
+        ],
+        "size": [
+          0.08999999999999986,
+          1.0017126202583313,
+          1.2199999999999998
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          2.1675,
+          0.0,
+          -1.2074999999999998
+        ],
+        "max": [
+          2.2575,
+          1.0017126202583313,
+          0.012500000000000002
+        ],
+        "center": [
+          2.2125,
+          0.5008563101291656,
+          -0.5974999999999999
+        ],
+        "size": [
+          0.08999999999999986,
+          1.0017126202583313,
+          1.2199999999999998
+        ]
+      }
+    },
+    {
+      "id": "wall_front_y_min",
+      "side_type": "y_min",
+      "bbox_glb": "unity_y_up/wall_boxes/wall_front_y_min_bbox.glb",
+      "box_collider": {
+        "center": [
+          1.0799999999999998,
+          0.5008563101291656,
+          0.012500000000000004
+        ],
+        "size": [
+          2.265,
+          1.0017126202583313,
+          0.053874138370156296
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          -0.0525,
+          0.0,
+          -0.014437069185078146
+        ],
+        "max": [
+          2.2125,
+          1.0017126202583313,
+          0.03943706918507815
+        ],
+        "center": [
+          1.0799999999999998,
+          0.5008563101291656,
+          0.012500000000000004
+        ],
+        "size": [
+          2.265,
+          1.0017126202583313,
+          0.053874138370156296
+        ]
+      }
+    },
+    {
+      "id": "wall_back_y_max",
+      "side_type": "y_max",
+      "bbox_glb": "unity_y_up/wall_boxes/wall_back_y_max_bbox.glb",
+      "box_collider": {
+        "center": [
+          1.0799999999999998,
+          0.5008563101291656,
+          -1.2074999999999998
+        ],
+        "size": [
+          2.265,
+          1.0017126202583313,
+          0.03500000000000014
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          -0.0525,
+          0.0,
+          -1.2249999999999999
+        ],
+        "max": [
+          2.2125,
+          1.0017126202583313,
+          -1.1899999999999997
+        ],
+        "center": [
+          1.0799999999999998,
+          0.5008563101291656,
+          -1.2074999999999998
+        ],
+        "size": [
+          2.265,
+          1.0017126202583313,
+          0.03500000000000014
+        ]
+      }
+    }
+  ],
+  "furniture": [
+    {
+      "id": "001_basket-001",
+      "category": "basket",
+      "selected_asset_filename": "vggt_room1_basket-1.glb",
+      "selected_candidate_rank": 1,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/001_basket-001.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/001_basket-001_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/001_basket-001_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/001_basket-001_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          0.15708202123641968,
+          0.10437666566576809,
+          -0.1393814142793417
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.18870127201080322,
+          0.2130488019902259,
+          0.2314753420650959
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          0.06273138523101807,
+          -0.0021477353293448687,
+          -0.25511908531188965
+        ],
+        "max": [
+          0.2514326572418213,
+          0.21090106666088104,
+          -0.023643743246793747
+        ],
+        "center": [
+          0.15708202123641968,
+          0.10437666566576809,
+          -0.1393814142793417
+        ],
+        "size": [
+          0.18870127201080322,
+          0.2130488019902259,
+          0.2314753420650959
+        ]
+      }
+    },
+    {
+      "id": "002_bed-001",
+      "category": "bed",
+      "selected_asset_filename": "vggt_room1_bed-1.glb",
+      "selected_candidate_rank": 2,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/002_bed-001.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/002_bed-001_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/002_bed-001_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/002_bed-001_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          1.4354491233825684,
+          0.25361141096800566,
+          -0.7702907472848892
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.9221887588500977,
+          0.47303701378405094,
+          0.8601615130901337
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          0.9743547439575195,
+          0.017092904075980186,
+          -1.200371503829956
+        ],
+        "max": [
+          1.8965435028076172,
+          0.49012991786003113,
+          -0.3402099907398224
+        ],
+        "center": [
+          1.4354491233825684,
+          0.25361141096800566,
+          -0.7702907472848892
+        ],
+        "size": [
+          0.9221887588500977,
+          0.47303701378405094,
+          0.8601615130901337
+        ]
+      }
+    },
+    {
+      "id": "003_cabinet-001",
+      "category": "cabinet",
+      "selected_asset_filename": "vggt_room1_cabinet-1.glb",
+      "selected_candidate_rank": 1,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/003_cabinet-001.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/003_cabinet-001_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/003_cabinet-001_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/003_cabinet-001_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          0.08048431668430567,
+          0.1899934746325016,
+          -0.4903021603822708
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.21674495749175549,
+          0.2626437470316887,
+          0.5615142285823822
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          -0.027888162061572075,
+          0.05867160111665726,
+          -0.7710592746734619
+        ],
+        "max": [
+          0.1888567954301834,
+          0.32131534814834595,
+          -0.2095450460910797
+        ],
+        "center": [
+          0.08048431668430567,
+          0.1899934746325016,
+          -0.4903021603822708
+        ],
+        "size": [
+          0.21674495749175549,
+          0.2626437470316887,
+          0.5615142285823822
+        ]
+      }
+    },
+    {
+      "id": "004_cabinet-002",
+      "category": "cabinet",
+      "selected_asset_filename": "vggt_room1_cabinet-2.glb",
+      "selected_candidate_rank": 11,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/004_cabinet-002.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/004_cabinet-002_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/004_cabinet-002_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/004_cabinet-002_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          0.8250314891338348,
+          0.16366250766441226,
+          -1.0818006992340088
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.3401258587837219,
+          0.30590656492859125,
+          0.1699213981628418
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          0.6549685597419739,
+          0.010709225200116634,
+          -1.1667613983154297
+        ],
+        "max": [
+          0.9950944185256958,
+          0.3166157901287079,
+          -0.9968400001525879
+        ],
+        "center": [
+          0.8250314891338348,
+          0.16366250766441226,
+          -1.0818006992340088
+        ],
+        "size": [
+          0.3401258587837219,
+          0.30590656492859125,
+          0.1699213981628418
+        ]
+      }
+    },
+    {
+      "id": "009_lamp-001",
+      "category": "lamp",
+      "selected_asset_filename": "vggt_room1_lamp-1.glb",
+      "selected_candidate_rank": 1,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/009_lamp-001.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/009_lamp-001_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/009_lamp-001_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/009_lamp-001_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          0.863995007276535,
+          0.38552914559841156,
+          -1.103529453277588
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.17523442983627324,
+          0.2669816315174103,
+          0.20112061500549316
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          0.7763777923583984,
+          0.2520383298397064,
+          -1.2040897607803345
+        ],
+        "max": [
+          0.9516122221946717,
+          0.5190199613571167,
+          -1.0029691457748413
+        ],
+        "center": [
+          0.863995007276535,
+          0.38552914559841156,
+          -1.103529453277588
+        ],
+        "size": [
+          0.17523442983627324,
+          0.2669816315174103,
+          0.20112061500549316
+        ]
+      }
+    },
+    {
+      "id": "010_lamp-002",
+      "category": "lamp",
+      "selected_asset_filename": "vggt_room1_lamp-1.glb",
+      "selected_candidate_rank": 13,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/010_lamp-002.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/010_lamp-002_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/010_lamp-002_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/010_lamp-002_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          1.8873519897460938,
+          0.38820311427116394,
+          -1.0810123980045319
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.14629912376403809,
+          0.23567873239517212,
+          0.19095557928085327
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          1.8142024278640747,
+          0.2703637480735779,
+          -1.1764901876449585
+        ],
+        "max": [
+          1.9605015516281128,
+          0.50604248046875,
+          -0.9855346083641052
+        ],
+        "center": [
+          1.8873519897460938,
+          0.38820311427116394,
+          -1.0810123980045319
+        ],
+        "size": [
+          0.14629912376403809,
+          0.23567873239517212,
+          0.19095557928085327
+        ]
+      }
+    },
+    {
+      "id": "011_picture-001",
+      "category": "picture",
+      "selected_asset_filename": "vggt_room1_picture-1.glb",
+      "selected_candidate_rank": 1,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/011_picture-001.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/011_picture-001_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/011_picture-001_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/011_picture-001_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          1.6445441246032715,
+          0.5904682129621506,
+          0.0016727829352021217
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.4680049419403076,
+          0.43211987614631653,
+          0.03895467333495617
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          1.4105416536331177,
+          0.3744082748889923,
+          -0.017804553732275963
+        ],
+        "max": [
+          1.8785465955734253,
+          0.8065281510353088,
+          0.021150119602680206
+        ],
+        "center": [
+          1.6445441246032715,
+          0.5904682129621506,
+          0.0016727829352021217
+        ],
+        "size": [
+          0.4680049419403076,
+          0.43211987614631653,
+          0.03895467333495617
+        ]
+      }
+    },
+    {
+      "id": "012_picture-002",
+      "category": "picture",
+      "selected_asset_filename": "vggt_room1_picture-1.glb",
+      "selected_candidate_rank": 1,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/012_picture-002.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/012_picture-002_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/012_picture-002_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/012_picture-002_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          -0.013961569871753454,
+          0.43425820767879486,
+          -0.49267904460430145
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.045709569938480854,
+          0.058641284704208374,
+          0.24969258904457092
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          -0.03681635484099388,
+          0.4049375653266907,
+          -0.6175253391265869
+        ],
+        "max": [
+          0.008893215097486973,
+          0.46357885003089905,
+          -0.367832750082016
+        ],
+        "center": [
+          -0.013961569871753454,
+          0.43425820767879486,
+          -0.49267904460430145
+        ],
+        "size": [
+          0.045709569938480854,
+          0.058641284704208374,
+          0.24969258904457092
+        ]
+      }
+    },
+    {
+      "id": "013_pillow-001",
+      "category": "pillow",
+      "selected_asset_filename": "vggt_room1_pillow-3.glb",
+      "selected_candidate_rank": 1,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/013_pillow-001.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/013_pillow-001_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/013_pillow-001_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/013_pillow-001_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          1.3650778830051422,
+          0.2575620487332344,
+          -0.9676945507526398
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.8423539996147156,
+          0.22373418509960175,
+          0.37457960844039917
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          0.9439008831977844,
+          0.14569495618343353,
+          -1.1549843549728394
+        ],
+        "max": [
+          1.7862548828125,
+          0.3694291412830353,
+          -0.7804047465324402
+        ],
+        "center": [
+          1.3650778830051422,
+          0.2575620487332344,
+          -0.9676945507526398
+        ],
+        "size": [
+          0.8423539996147156,
+          0.22373418509960175,
+          0.37457960844039917
+        ]
+      }
+    },
+    {
+      "id": "014_pillow-002",
+      "category": "pillow",
+      "selected_asset_filename": "vggt_room1_pillow-5.glb",
+      "selected_candidate_rank": 1,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/014_pillow-002.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/014_pillow-002_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/014_pillow-002_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/014_pillow-002_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          1.6251322627067566,
+          0.20746254175901413,
+          -0.4125336557626724
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.37800776958465576,
+          0.09372062981128693,
+          0.26267215609550476
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          1.4361283779144287,
+          0.16060222685337067,
+          -0.5438697338104248
+        ],
+        "max": [
+          1.8141361474990845,
+          0.2543228566646576,
+          -0.28119757771492004
+        ],
+        "center": [
+          1.6251322627067566,
+          0.20746254175901413,
+          -0.4125336557626724
+        ],
+        "size": [
+          0.37800776958465576,
+          0.09372062981128693,
+          0.26267215609550476
+        ]
+      }
+    },
+    {
+      "id": "015_pillow-003",
+      "category": "pillow",
+      "selected_asset_filename": "vggt_room1_pillow-5.glb",
+      "selected_candidate_rank": 1,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/015_pillow-003.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/015_pillow-003_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/015_pillow-003_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/015_pillow-003_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          1.0084052979946136,
+          0.1424073725938797,
+          -0.373076394200325
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.10043221712112427,
+          0.13553369045257568,
+          0.09026661515235901
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          0.9581891894340515,
+          0.07464052736759186,
+          -0.4182097017765045
+        ],
+        "max": [
+          1.0586214065551758,
+          0.21017421782016754,
+          -0.3279430866241455
+        ],
+        "center": [
+          1.0084052979946136,
+          0.1424073725938797,
+          -0.373076394200325
+        ],
+        "size": [
+          0.10043221712112427,
+          0.13553369045257568,
+          0.09026661515235901
+        ]
+      }
+    },
+    {
+      "id": "016_vase-001",
+      "category": "vase",
+      "selected_asset_filename": "vggt_room1_vase-1.glb",
+      "selected_candidate_rank": 1,
+      "placed_asset_global_glb": "unity_y_up/placed_assets/016_vase-001.glb",
+      "movable_asset_local_pivot_glb": "unity_y_up/movable_assets_local_pivot/016_vase-001_local_pivot.glb",
+      "global_bbox_glb": "unity_y_up/furniture_boxes_global/016_vase-001_bbox_global.glb",
+      "local_collider_box_glb": "unity_y_up/movable_collider_boxes_local/016_vase-001_collider_box_local.glb",
+      "initial_transform": {
+        "position": [
+          0.040606213733553886,
+          0.3827740103006363,
+          -0.3547724783420563
+        ],
+        "rotation_euler_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "box_collider": {
+        "center_local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.12371451035141945,
+          0.16728582978248596,
+          0.15966397523880005
+        ]
+      },
+      "global_bbox": {
+        "min": [
+          -0.021251041442155838,
+          0.2991310954093933,
+          -0.4346044659614563
+        ],
+        "max": [
+          0.10246346890926361,
+          0.4664169251918793,
+          -0.27494049072265625
+        ],
+        "center": [
+          0.040606213733553886,
+          0.3827740103006363,
+          -0.3547724783420563
+        ],
+        "size": [
+          0.12371451035141945,
+          0.16728582978248596,
+          0.15966397523880005
+        ]
+      }
+    }
+  ]
+}

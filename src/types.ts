@@ -40,9 +40,10 @@ export interface RoomProject {
   realPhotos: string[];
   description: string;
   // ── 3D scene (ReplicaCAD) ──────────────────────────────────────────────────
-  glbPath?: string;         // Windows absolute path to stage GLB
-  sceneJsonPath?: string;   // Windows absolute path to scene_instance.json
-  objectsBasePath?: string; // Windows absolute path to objects/ directory
+  glbPath?: string;         // Local absolute path to room/stage GLB
+  sceneJsonPath?: string;   // Local absolute path to scene_instance.json
+  objectsBasePath?: string; // Local absolute path to objects/ directory
+  deliveryManifestPath?: string; // Local absolute path to room delivery manifest
 }
 
 export interface SnackbarItem {

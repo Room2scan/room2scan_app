@@ -71,6 +71,14 @@ type UnityViewHandle = {
   postMessage: (go: string, method: string, msg: string) => void;
 };
 type UnityMessageEvent = NativeSyntheticEvent<{ message: string }>;
+
+const LOAD_ROOM_RETRY_DELAY_MS = 1500;
+const LOAD_ROOM_MAX_RETRIES = 120;
+const LOCAL_ROOM1_BOUNDS = {
+  min: { x: -0.10, y: 0.0, z: -1.23 },
+  max: { x:  2.26, y: 1.02, z:  0.04 },
+};
+
 type LogItem = {
   id: string;
   direction: 'RN → Unity' | 'Unity → RN';
@@ -161,6 +169,9 @@ export const UnityEditorScreen = ({
   const [unityConnected, setUnityConnected] = useState(false);
   const unityFallbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingLoadRoomCmd  = useRef<UnityBridgeEnvelope | null>(null);
+  const loadRoomRetryCount  = useRef(0);
+  const unityBridgeReady    = useRef(false);
+  const loadRoomPostedToReadyBridge = useRef(false);
   const layoutRestoredRef   = useRef(false); // prevent double-restore per session
 
   // ── Custom (procedural) room spec — loaded from AsyncStorage for re-entry ──
@@ -180,6 +191,8 @@ export const UnityEditorScreen = ({
     useState<Record<string, boolean>>({});   // true = locked  (default false)
   const [objectCatalogIds, setObjectCatalogIds] =
     useState<Record<string, string>>({});    // instanceId → catalogId
+  const [collisionState, setCollisionState] =
+    useState<Record<string, boolean>>({});
 
   // ── UI-navigation state ───────────────────────────────────────────────────
   const [activeTab,           setActiveTab]           = useState<ActiveTab>('object');
@@ -241,11 +254,26 @@ export const UnityEditorScreen = ({
   /** Parse an incoming Unity event and update the relevant UI state. */
   const handleUnityEvent = (name: string, payload: Record<string, any>) => {
     switch (name) {
+      case 'BridgeReady': {
+        unityBridgeReady.current = true;
+        const pending = pendingLoadRoomCmd.current;
+        if (pending && !loadRoomPostedToReadyBridge.current) {
+          loadRoomRetryCount.current = 0;
+          loadRoomPostedToReadyBridge.current = postToNativeUnity(pending);
+          clearLoadRoomTimer();
+        }
+        break;
+      }
 
       case 'RoomLoaded': {
         // Unity confirmed the room loaded — cancel fallback timer, reveal 3-D view.
         if (payload.success) {
-          setUnityConnected(true);
+          if (!payload.simulated) {
+            setUnityConnected(true);
+            pendingLoadRoomCmd.current = null;
+            loadRoomRetryCount.current = 0;
+            loadRoomPostedToReadyBridge.current = false;
+          }
           if (unityFallbackTimer.current) {
             clearTimeout(unityFallbackTimer.current);
             unityFallbackTimer.current = null;
@@ -282,6 +310,8 @@ export const UnityEditorScreen = ({
       case 'FurnitureSelected': {
         const { instanceId, success, position, rotationYDeg = 0, scale = 0.8 } = payload;
         if (success && position && instanceId) {
+          setSelectedInstanceId(instanceId);
+          setShowObjectDetail(true);
           setObjectTransforms(prev => ({
             ...prev,
             [instanceId]: { position, rotationYDeg, scale },
@@ -414,8 +444,8 @@ export const UnityEditorScreen = ({
         // RN can use this to show a warning badge — currently just logged.
         const { instanceId: cid, hasCollision } = payload;
         if (cid) {
+          setCollisionState(prev => ({ ...prev, [cid]: !!hasCollision }));
           console.log(`[Editor] CollisionStatus: ${cid} → ${hasCollision ? '⛔ collision' : '✅ clear'}`);
-          // Future: expose in UI state for a red/green indicator overlay
         }
         break;
       }
@@ -440,7 +470,7 @@ export const UnityEditorScreen = ({
     switch (cmd.name) {
       case 'LoadRoom':
         receiveFromUnity(serializeBridgeMessage(
-          createMockUnityEvent(cmd.requestId, 'RoomLoaded', { roomId: 'replica_room0', success: true })
+          createMockUnityEvent(cmd.requestId, 'RoomLoaded', { roomId: 'replica_room0', success: true, simulated: true })
         ));
         break;
 
@@ -451,7 +481,7 @@ export const UnityEditorScreen = ({
           createMockUnityEvent(cmd.requestId, 'ProceduralRoomCreated', { roomId: p.roomId, success: true })
         ));
         receiveFromUnity(serializeBridgeMessage(
-          createMockUnityEvent(cmd.requestId, 'RoomLoaded', { roomId: p.roomId, success: true })
+          createMockUnityEvent(cmd.requestId, 'RoomLoaded', { roomId: p.roomId, success: true, simulated: true })
         ));
         break;
       }
@@ -604,35 +634,84 @@ export const UnityEditorScreen = ({
     }
   };
 
-  const sendToUnity = (cmd: UnityBridgeEnvelope) => {
-    const msg = serializeBridgeMessage(cmd);
-    addLog('RN → Unity', cmd.name, msg);
-    if (UnityView && unityRef.current) {
-      unityRef.current.postMessage(UNITY_GAME_OBJECT, UNITY_RECEIVE_METHOD, msg);
-
-      // For LoadRoom: start a 4-second window to hear back from Unity.
-      // If Unity doesn't respond (e.g. GLB path inaccessible on device), we
-      // activate simulation mode so the screen stays useful.
-      if (cmd.name === 'LoadRoom') {
-        pendingLoadRoomCmd.current = cmd;
-        if (unityFallbackTimer.current) clearTimeout(unityFallbackTimer.current);
-        unityFallbackTimer.current = setTimeout(() => {
-          if (pendingLoadRoomCmd.current) {
-            // Trigger the full simulation path as if Unity answered
-            simulateUnityResponse(pendingLoadRoomCmd.current);
-            pendingLoadRoomCmd.current = null;
-          }
-        }, 4000);
-      }
-    } else {
-      // No native Unity view — pure simulation
-      simulateUnityResponse(cmd);
+  const clearLoadRoomTimer = () => {
+    if (unityFallbackTimer.current) {
+      clearTimeout(unityFallbackTimer.current);
+      unityFallbackTimer.current = null;
     }
   };
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Action handlers
-  // ─────────────────────────────────────────────────────────────────────────
+  const postToNativeUnity = (cmd: UnityBridgeEnvelope) => {
+    const msg = serializeBridgeMessage(cmd);
+    addLog('RN → Unity', cmd.name, msg);
+    if (!UnityView || !unityRef.current) return false;
+
+    unityRef.current.postMessage(UNITY_GAME_OBJECT, UNITY_RECEIVE_METHOD, msg);
+    return true;
+  };
+
+  const scheduleLoadRoomRetry = () => {
+    if (loadRoomPostedToReadyBridge.current) return;
+
+    clearLoadRoomTimer();
+    unityFallbackTimer.current = setTimeout(() => {
+      const pending = pendingLoadRoomCmd.current;
+      if (!pending) return;
+
+      if (unityBridgeReady.current) {
+        loadRoomPostedToReadyBridge.current = postToNativeUnity(pending);
+        unityFallbackTimer.current = null;
+        return;
+      }
+
+      if (UnityView && loadRoomRetryCount.current < LOAD_ROOM_MAX_RETRIES) {
+        loadRoomRetryCount.current += 1;
+        postToNativeUnity(pending);
+        scheduleLoadRoomRetry();
+        return;
+      }
+
+      simulateUnityResponse(pending);
+      pendingLoadRoomCmd.current = null;
+      loadRoomRetryCount.current = 0;
+      loadRoomPostedToReadyBridge.current = false;
+      unityFallbackTimer.current = null;
+    }, LOAD_ROOM_RETRY_DELAY_MS);
+  };
+
+  const sendToUnity = (cmd: UnityBridgeEnvelope) => {
+    const posted = postToNativeUnity(cmd);
+
+    if (cmd.name === 'LoadRoom') {
+      pendingLoadRoomCmd.current = cmd;
+      loadRoomPostedToReadyBridge.current = posted && unityBridgeReady.current;
+      loadRoomRetryCount.current = posted ? 0 : 1;
+
+      if (UnityView && !loadRoomPostedToReadyBridge.current) {
+        scheduleLoadRoomRetry();
+      } else {
+        if (!UnityView) simulateUnityResponse(cmd);
+      }
+      return;
+    }
+
+    if (!posted) simulateUnityResponse(cmd);
+    return;
+  };
+
+  const createCurrentRoomLoadCommand = () => {
+    const room = roomId ? MY_ROOMS.find(r => r.id === roomId) : MY_ROOMS[0];
+    if (!room?.glbPath) return createMockRoomPayload();
+
+    return createRoomPayload({
+      roomId:               room.deliveryManifestPath ? `local_delivery_${room.id}` : `replica_cad_${room.id}`,
+      meshUri:              room.glbPath,
+      sceneInstancePath:    room.sceneJsonPath,
+      objectsBasePath:      room.objectsBasePath,
+      deliveryManifestPath: room.deliveryManifestPath,
+      bounds:               room.deliveryManifestPath ? LOCAL_ROOM1_BOUNDS : undefined,
+    });
+  };
 
   const handleAddFurniture = (catalogId = selectedCatalogId) => {
     const id  = nextInstanceId();
@@ -722,10 +801,12 @@ export const UnityEditorScreen = ({
     if (tool === 'rotate')    handleRotate();
     if (tool === 'delete')    handleDelete();
     if (tool === 'duplicate') handleDuplicate();
+    sendToUnity(createSetActiveToolPayload('select'));
     setSelectedTool('select');
   };
 
   const handleReset = () => {
+    const reloadCommand = createCurrentRoomLoadCommand();
     sendToUnity(createResetEditorPayload());
     setAddedInstanceIds([]);
     setSelectedInstanceId(null);
@@ -734,12 +815,18 @@ export const UnityEditorScreen = ({
     setObjectVisibility({});
     setObjectLocked({});
     setObjectCatalogIds({});
+    setCollisionState({});
     furnitureCounter = 0;
+    layoutRestoredRef.current = false;
+    setUnityConnected(false);
+    setTimeout(() => sendToUnity(reloadCommand), 100);
   };
 
   // ── Restore persisted layout once Unity confirms the room is loaded ──────
   useEffect(() => {
     if (!unityConnected || layoutRestoredRef.current) return;
+    const room = roomId ? MY_ROOMS.find(r => r.id === roomId) : MY_ROOMS[0];
+    if (room?.deliveryManifestPath) return;
     layoutRestoredRef.current = true;
 
     const roomKey = roomId ?? 'default';
@@ -793,16 +880,7 @@ export const UnityEditorScreen = ({
     }
 
     // ── Preset GLB room ────────────────────────────────────────────────────
-    const room = roomId ? MY_ROOMS.find(r => r.id === roomId) : null;
-    const payload = room?.glbPath
-      ? createRoomPayload({
-          roomId:            `replica_cad_${room.id}`,
-          meshUri:           room.glbPath,
-          sceneInstancePath: room.sceneJsonPath,
-          objectsBasePath:   room.objectsBasePath,
-        })
-      : createMockRoomPayload(); // fallback: apt_0
-    sendToUnity(payload);
+    sendToUnity(createCurrentRoomLoadCommand());
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -818,6 +896,7 @@ export const UnityEditorScreen = ({
       type:      catItem?.type ?? '가구',
       thumbnail: catItem?.thumbnail ?? '🪑',
       color:     catItem?.color ?? '#EAE8FF',
+      hasCollision: collisionState[id] ?? false,
     };
   });
 
@@ -868,6 +947,9 @@ export const UnityEditorScreen = ({
               </View>
               <Text style={s.detailSub}>{selCatItem?.type ?? '가구'} · {selCatItem?.dimensions ?? ''}</Text>
               <Text style={s.detailSub}>ID: {selectedInstanceId.slice(0, 16)}</Text>
+              {collisionState[selectedInstanceId] && (
+                <Text style={[s.detailSub, { color: RED, fontWeight: '600' }]}>Collision detected</Text>
+              )}
             </View>
             <View style={{ alignItems: 'center', gap: 2 }}>
               <TouchableOpacity style={s.actionBtn} onPress={handleDuplicate}>
@@ -974,6 +1056,9 @@ export const UnityEditorScreen = ({
                 >
                   <Feather name="lock" size={16} color={locked ? N700 : N300} />
                 </TouchableOpacity>
+                {o.hasCollision && (
+                  <Feather name="alert-triangle" size={15} color={RED} />
+                )}
               </TouchableOpacity>
             );
           })

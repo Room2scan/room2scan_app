@@ -2,6 +2,7 @@ package com.scan2room.app
 
 import android.app.Application
 import android.content.res.Configuration
+import android.util.Log
 
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
@@ -14,6 +15,8 @@ import com.facebook.soloader.SoLoader
 
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
+import java.io.File
+import java.io.FileOutputStream
 
 class MainApplication : Application(), ReactApplication {
 
@@ -40,12 +43,55 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    prepareBundledRoomAssetsAsync()
     SoLoader.init(this, false)
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       load()
     }
     ApplicationLifecycleDispatcher.onApplicationCreate(this)
+  }
+
+  private fun prepareBundledRoomAssetsAsync() {
+    Thread {
+      try {
+        val assetRoot = "room2scan_local_rooms"
+        val targetRoot = File(filesDir, assetRoot)
+        copyAssetTree(assetRoot, targetRoot)
+        Log.i("Room2Scan", "Bundled room assets are ready at ${targetRoot.absolutePath}")
+      } catch (ex: Exception) {
+        Log.w("Room2Scan", "Bundled room asset copy failed: ${ex.message}")
+      }
+    }.start()
+  }
+
+  private fun copyAssetTree(assetPath: String, target: File) {
+    val children = assets.list(assetPath) ?: emptyArray()
+    if (children.isEmpty()) {
+      copyAssetFile(assetPath, target)
+      return
+    }
+
+    if (!target.exists()) target.mkdirs()
+    children.forEach { child ->
+      copyAssetTree("$assetPath/$child", File(target, child))
+    }
+  }
+
+  private fun copyAssetFile(assetPath: String, target: File) {
+    try {
+      val expectedSize = assets.open(assetPath).use { it.available().toLong() }
+      if (target.exists() && target.length() == expectedSize) return
+
+      target.parentFile?.mkdirs()
+      assets.open(assetPath).use { input ->
+        FileOutputStream(target).use { output ->
+          input.copyTo(output)
+        }
+      }
+    } catch (_: Exception) {
+      // Missing optional bundled assets should not prevent app startup.
+    }
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {

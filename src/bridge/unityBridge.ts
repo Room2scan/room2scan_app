@@ -3,6 +3,8 @@
 // RN-side bridge contract for the Room Editor
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { Platform } from 'react-native';
+
 export const UNITY_BRIDGE_SCHEMA = 'unity-bridge/v1';
 export const UNITY_GAME_OBJECT   = 'UnityBridge';
 export const UNITY_RECEIVE_METHOD = 'ReceiveFromRN';
@@ -86,19 +88,29 @@ export const createBridgeCommand = <TPayload extends Record<string, unknown>>(
 // ─── RN → Unity commands ──────────────────────────────────────────────────────
 
 // ─── ReplicaCAD local dataset paths ──────────────────────────────────────────
-const REPLICA_CAD_ROOT = 'E:\\unity\\replica_cad_data';
+const PATH_SEP = Platform.OS === 'android' ? '/' : '\\';
+const REPLICA_CAD_ROOT = Platform.OS === 'android'
+  ? '/data/user/0/com.scan2room.app/files/replica_cad'
+  : 'E:\\unity\\replica_cad_data';
 
 // ─── Shared room payload builder ──────────────────────────────────────────────
 
 export interface RoomPayloadOptions {
   /** Unique room ID sent to Unity (e.g. 'replica_cad_apt_0') */
   roomId: string;
-  /** Windows absolute path to stage GLB */
+  /** Local absolute path to stage/room GLB */
   meshUri: string;
-  /** Windows absolute path to scene_instance.json (optional) */
+  /** Local absolute path to scene_instance.json (optional) */
   sceneInstancePath?: string;
-  /** Windows absolute path to objects/ directory (optional) */
+  /** Local absolute path to objects/ directory (optional) */
   objectsBasePath?: string;
+  /** Local absolute path to Unity delivery manifest (optional) */
+  deliveryManifestPath?: string;
+  /** Optional room bounds override in Unity room-local metres */
+  bounds?: {
+    min: Vec3;
+    max: Vec3;
+  };
 }
 
 /** LoadRoom — load a ReplicaCAD GLB + auto-place scene objects */
@@ -137,9 +149,10 @@ export const createRoomPayload = (opts: RoomPayloadOptions) =>
         format: 'glb',
       },
       // Extra fields read by UnityBridge to auto-place scene objects.
-      sceneInstancePath: opts.sceneInstancePath,
-      objectsBasePath:   opts.objectsBasePath,
-      bounds: {
+      sceneInstancePath:    opts.sceneInstancePath,
+      objectsBasePath:      opts.objectsBasePath,
+      deliveryManifestPath: opts.deliveryManifestPath,
+      bounds: opts.bounds ?? {
         // Approximate bounds for frl_apartment (metres, post-GLTFast space).
         min: { x: -5.5, y:  0.0, z: -1.5 },
         max: { x:  5.5, y:  3.2, z:  8.5 },
@@ -167,9 +180,9 @@ export const createRoomPayload = (opts: RoomPayloadOptions) =>
 export const createMockRoomPayload = () =>
   createRoomPayload({
     roomId:            'replica_cad_apt_0',
-    meshUri:           `${REPLICA_CAD_ROOT}\\stages\\frl_apartment_stage.glb`,
-    sceneInstancePath: `${REPLICA_CAD_ROOT}\\configs\\scenes\\apt_0.scene_instance.json`,
-    objectsBasePath:   `${REPLICA_CAD_ROOT}\\objects`,
+    meshUri:           `${REPLICA_CAD_ROOT}${PATH_SEP}stages${PATH_SEP}frl_apartment_stage.glb`,
+    sceneInstancePath: `${REPLICA_CAD_ROOT}${PATH_SEP}configs${PATH_SEP}scenes${PATH_SEP}apt_0.scene_instance.json`,
+    objectsBasePath:   `${REPLICA_CAD_ROOT}${PATH_SEP}objects`,
   });
 
 /** SaveLayout — persist the current furniture layout */
