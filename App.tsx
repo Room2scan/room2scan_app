@@ -116,7 +116,8 @@ export default function App() {
       return (
         <MyRoomsScreen
           onOpenRoom={goRoomDetail}
-          onAddRoom={() => goCamera('room')}
+          onAddRoom={goRoomSetup}
+          onScanRoom={() => goCamera('room')}
           onTabChange={handleTabChange}
         />
       );

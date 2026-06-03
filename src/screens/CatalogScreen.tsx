@@ -10,6 +10,7 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomNav } from '../components/Shared';
+import { Furniture3DPreview } from '../components/Furniture3DPreview';
 import { ProductDetailScreen } from './ProductDetailScreen';
 import { ALL_FURNITURE, CATEGORY_TABS } from '../data';
 import { MainTab, FurnitureItem, CatalogCategory } from '../types';
@@ -180,8 +181,16 @@ const CatalogList = ({
                 style={styles.card}
               >
                 <View style={styles.cardImageWrap}>
-                  <View style={[styles.cardImage, { backgroundColor: `${item.color}30` }]}>
-                    <Text style={styles.cardEmoji}>{item.thumbnail}</Text>
+                  <View style={[styles.cardImage, { backgroundColor: `${item.color}18` }]}>
+                    {item.isMyFurniture ? (
+                      <Text style={styles.cardEmoji}>{item.thumbnail}</Text>
+                    ) : (
+                      <Furniture3DPreview
+                        color={item.color}
+                        emoji={item.thumbnail}
+                        size={72}
+                      />
+                    )}
                   </View>
                   {!item.isMyFurniture && (
                     <TouchableOpacity
@@ -203,7 +212,7 @@ const CatalogList = ({
                 </View>
                 <View>
                   <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
-                  <Text style={styles.cardMeta}>{item.type} · {item.dimensions}</Text>
+                  <Text style={styles.cardMeta}>{item.type}</Text>
                 </View>
                 <View style={styles.cardFooter}>
                   <Text style={styles.cardPrice}>{item.price}</Text>

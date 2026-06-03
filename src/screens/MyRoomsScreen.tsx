@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -184,17 +186,20 @@ const StaticRoomCard = ({
 interface MyRoomsScreenProps {
   onOpenRoom: (roomId: string) => void;
   onAddRoom: () => void;
+  onScanRoom?: () => void;
   onTabChange: (t: MainTab) => void;
 }
 
 export const MyRoomsScreen = ({
   onOpenRoom,
   onAddRoom,
+  onScanRoom,
   onTabChange,
 }: MyRoomsScreenProps) => {
   const insets = useSafeAreaInsets();
   const [customRooms, setCustomRooms] = useState<CustomRoom[]>([]);
   const [loading, setLoading]         = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Load from AsyncStorage on mount (screen remounts on each navigation)
   useEffect(() => {
@@ -279,11 +284,59 @@ export const MyRoomsScreen = ({
 
       {/* FAB */}
       <View style={styles.fabContainer}>
-        <TouchableOpacity onPress={onAddRoom} activeOpacity={0.88} style={styles.fab}>
+        <TouchableOpacity onPress={() => setShowAddModal(true)} activeOpacity={0.88} style={styles.fab}>
           <Feather name="plus" size={20} color="#fff" />
           <Text style={styles.fabText}>새 방 추가하기</Text>
         </TouchableOpacity>
       </View>
+
+      {/* 새 방 추가 모달 */}
+      <Modal
+        visible={showAddModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowAddModal(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setShowAddModal(false)}>
+          <Pressable style={[styles.modalSheet, { paddingBottom: insets.bottom + 24 }]} onPress={() => {}}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>새 방 만들기</Text>
+            <Text style={styles.modalSubtitle}>어떻게 시작할까요?</Text>
+
+            {/* 치수로 시작하기 */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={styles.modalOption}
+              onPress={() => { setShowAddModal(false); onAddRoom(); }}
+            >
+              <View style={[styles.modalOptionIcon, { backgroundColor: '#EAE8FF' }]}>
+                <Feather name="edit-3" size={22} color="#4A3AFF" />
+              </View>
+              <View style={styles.modalOptionText}>
+                <Text style={styles.modalOptionTitle}>치수로 시작하기</Text>
+                <Text style={styles.modalOptionDesc}>수치를 입력해서 시작해요</Text>
+              </View>
+              <Feather name="chevron-right" size={18} color="#A0A3BD" />
+            </TouchableOpacity>
+
+            {/* 스캔으로 시작하기 */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={styles.modalOption}
+              onPress={() => { setShowAddModal(false); onScanRoom?.(); }}
+            >
+              <View style={[styles.modalOptionIcon, { backgroundColor: '#E0EDFF' }]}>
+                <Feather name="camera" size={22} color="#2563EB" />
+              </View>
+              <View style={styles.modalOptionText}>
+                <Text style={[styles.modalOptionTitle, { color: '#2563EB' }]}>스캔으로 시작하기</Text>
+                <Text style={styles.modalOptionDesc}>카메라로 방을 촬영해서 시작해요</Text>
+              </View>
+              <Feather name="chevron-right" size={18} color="#A0A3BD" />
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       <BottomNav activeTab="rooms" onTabChange={onTabChange} />
     </View>
@@ -412,4 +465,36 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.38, shadowRadius: 14, elevation: 8,
   },
   fabText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+
+  // 새 방 추가 모달
+  modalOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    paddingHorizontal: 24, paddingTop: 16,
+  },
+  modalHandle: {
+    width: 40, height: 4, borderRadius: 2,
+    backgroundColor: '#E9EAF0', alignSelf: 'center', marginBottom: 20,
+  },
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#170F49', marginBottom: 4 },
+  modalSubtitle: { fontSize: 13, color: '#A0A3BD', marginBottom: 24 },
+  modalOption: {
+    flexDirection: 'row', alignItems: 'center', gap: 16,
+    backgroundColor: '#FBFBFE', borderRadius: 20,
+    padding: 18, marginBottom: 12,
+    borderWidth: 1, borderColor: '#F1F2F9',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04, shadowRadius: 2, elevation: 1,
+  },
+  modalOptionIcon: {
+    width: 48, height: 48, borderRadius: 16,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  modalOptionText: { flex: 1 },
+  modalOptionTitle: { fontSize: 15, fontWeight: '700', color: '#170F49', marginBottom: 2 },
+  modalOptionDesc: { fontSize: 12, color: '#A0A3BD' },
 });

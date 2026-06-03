@@ -59,13 +59,11 @@ export const HomeScreen = ({
 
   return (
     <View style={styles.container}>
-      {/* Fixed top bar */}
-      <Animated.View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
-        <Animated.View style={{ backgroundColor: 'rgba(251,251,254,1)', ...StyleSheet.absoluteFillObject, opacity: headerBgOpacity }} />
-        {/* Wordmark fades in on the white top-bar as banner collapses */}
-        <Animated.Image
+      {/* Fixed top bar — always white */}
+      <View style={[styles.topBar, { paddingTop: insets.top + 8, backgroundColor: '#fff' }]}>
+        <Image
           source={require('../../assets/Room2scan.png')}
-          style={[styles.wordmarkTopBar, { opacity: titleOpacity }]}
+          style={styles.wordmarkTopBar}
           resizeMode="contain"
         />
         <View style={styles.topBarRight}>
@@ -76,7 +74,7 @@ export const HomeScreen = ({
             <Text style={styles.avatarText}>박</Text>
           </View>
         </View>
-      </Animated.View>
+      </View>
 
       {/* Hero banner */}
       <Animated.View style={[styles.heroBanner, { height: bannerHeight, transform: [{ scale: bannerScale }] }]}>
@@ -93,17 +91,6 @@ export const HomeScreen = ({
             />
           </Animated.View>
         ))}
-
-        {/* Brand label – wordmark overlaid on banner, fades out when scrolled */}
-        <Animated.View style={[styles.brandLabel, { top: insets.top + 14, opacity: bannerOpacity }]}>
-          <View style={styles.wordmarkPill}>
-            <Image
-              source={require('../../assets/Room2scan.png')}
-              style={styles.wordmarkImg}
-              resizeMode="contain"
-            />
-          </View>
-        </Animated.View>
 
         {/* Banner content */}
         <Animated.View style={[styles.bannerContent, { opacity: bannerOpacity }]}>
@@ -158,24 +145,6 @@ export const HomeScreen = ({
               </TouchableOpacity>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll} contentContainerStyle={styles.hScrollContent}>
-              {/* Add room button — manual dimensions */}
-              <TouchableOpacity onPress={onAddRoom} activeOpacity={0.8} style={styles.addRoomCard}>
-                <View style={styles.addRoomIcon}>
-                  <Feather name="plus" size={18} color="#4A3AFF" />
-                </View>
-                <Text style={styles.addRoomTitle}>새 방</Text>
-                <Text style={styles.addRoomSub}>치수 입력</Text>
-              </TouchableOpacity>
-              {/* Scan room button — camera flow */}
-              {!!onScanRoom && (
-                <TouchableOpacity onPress={onScanRoom} activeOpacity={0.8} style={[styles.addRoomCard, { borderColor: '#E0EDFF' }]}>
-                  <View style={[styles.addRoomIcon, { backgroundColor: '#E0EDFF' }]}>
-                    <Feather name="camera" size={18} color="#2563EB" />
-                  </View>
-                  <Text style={[styles.addRoomTitle, { color: '#2563EB' }]}>스캔</Text>
-                  <Text style={styles.addRoomSub}>카메라</Text>
-                </TouchableOpacity>
-              )}
 
               {MY_ROOMS.map(room => (
                 <TouchableOpacity key={room.id} onPress={() => onOpenRoom(room.id)} activeOpacity={0.85} style={styles.roomCard}>
