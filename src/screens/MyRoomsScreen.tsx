@@ -187,6 +187,7 @@ const StaticRoomCard = ({
 
 interface MyRoomsScreenProps {
   rooms?: (typeof MY_ROOMS)[number][];
+  refreshKey?: number;
   onOpenRoom: (roomId: string) => void;
   onAddRoom: () => void;
   onScanRoom?: () => void;
@@ -195,6 +196,7 @@ interface MyRoomsScreenProps {
 
 export const MyRoomsScreen = ({
   rooms = MY_ROOMS,
+  refreshKey = 0,
   onOpenRoom,
   onAddRoom,
   onScanRoom,
@@ -219,7 +221,7 @@ export const MyRoomsScreen = ({
         if (alive) setLoading(false);
       });
     return () => { alive = false; };
-  }, []);
+  }, [refreshKey]);
 
   const isEmpty = !loading && customRooms.length === 0 && rooms.length === 0;
 

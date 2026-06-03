@@ -16,7 +16,8 @@ import { SplashScreen } from './src/screens/SplashScreen';
 import { SnackbarContainer } from './src/components/Shared';
 
 import { MY_ROOMS } from './src/data';
-import { RoomProject } from './src/types';
+import { deleteCustomRoom } from './src/utils/roomStorage';
+import { RoomProject, CatalogCategory } from './src/types';
 import { AppState as BaseAppState, MainTab, SnackbarItem } from './src/types';
 type AppState = BaseAppState | 'roomSetup';
 
@@ -37,11 +38,15 @@ export default function App() {
   }, []);
 
   const [rooms, setRooms] = useState<RoomProject[]>(MY_ROOMS);
+  const [roomsRefreshKey, setRoomsRefreshKey] = useState(0);
+  const [catalogInitialCategory, setCatalogInitialCategory] = useState<CatalogCategory>('trend');
   const [newRoomId,   setNewRoomId]   = useState<string>('r1');
   const [newRoomName, setNewRoomName] = useState<string>('');
 
-  const handleDeleteRoom = useCallback((id: string) => {
+  const handleDeleteRoom = useCallback(async (id: string) => {
     setRooms(prev => prev.filter(r => r.id !== id));
+    await deleteCustomRoom(id);          // removes from AsyncStorage for custom rooms
+    setRoomsRefreshKey(k => k + 1);      // triggers MyRoomsScreen to re-fetch
     addSnack('방이 삭제되었어요', '🗑️');
   }, [addSnack]);
 
@@ -119,6 +124,10 @@ export default function App() {
           onOpenRoom={goRoomDetail}
           onTabChange={handleTabChange}
           onSnack={addSnack}
+          onOpenCatalogTrend={() => {
+            setCatalogInitialCategory('trend');
+            handleTabChange('catalog');
+          }}
         />
       );
     }
@@ -126,6 +135,7 @@ export default function App() {
       return (
         <MyRoomsScreen
           rooms={rooms}
+          refreshKey={roomsRefreshKey}
           onOpenRoom={goRoomDetail}
           onAddRoom={goRoomSetup}
           onScanRoom={() => goCamera('room')}
@@ -136,6 +146,7 @@ export default function App() {
     if (activeTab === 'catalog') {
       return (
         <CatalogFlowContainer
+          initialCategory={catalogInitialCategory}
           onAddMyFurniture={() => goCamera('furniture')}
           onTabChange={handleTabChange}
           onSnack={addSnack}

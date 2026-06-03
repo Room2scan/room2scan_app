@@ -29,12 +29,14 @@ import { ALL_FURNITURE, CATEGORY_TABS } from '../data';
 import { MainTab, FurnitureItem, CatalogCategory } from '../types';
 
 interface CatalogFlowContainerProps {
+  initialCategory?: CatalogCategory;
   onAddMyFurniture: () => void;
   onTabChange: (t: MainTab) => void;
   onSnack: (msg: string, icon?: string) => void;
 }
 
 export const CatalogFlowContainer = ({
+  initialCategory,
   onAddMyFurniture,
   onTabChange,
   onSnack,
@@ -88,6 +90,7 @@ export const CatalogFlowContainer = ({
 
   return (
     <CatalogList
+      initialCategory={initialCategory}
       wishlistIds={wishlistIds}
       onAddMyFurniture={onAddMyFurniture}
       onTabChange={onTabChange}
@@ -99,6 +102,7 @@ export const CatalogFlowContainer = ({
 };
 
 interface CatalogListProps {
+  initialCategory?: CatalogCategory;
   wishlistIds: Set<string>;
   onAddMyFurniture: () => void;
   onTabChange: (t: MainTab) => void;
@@ -108,6 +112,7 @@ interface CatalogListProps {
 }
 
 const CatalogList = ({
+  initialCategory,
   wishlistIds,
   onAddMyFurniture,
   onTabChange,
@@ -116,7 +121,7 @@ const CatalogList = ({
   onToggleWishlist,
 }: CatalogListProps) => {
   const insets = useSafeAreaInsets();
-  const [activeCategory, setActiveCategory] = useState<CatalogCategory>('wishlist');
+  const [activeCategory, setActiveCategory] = useState<CatalogCategory>(initialCategory ?? 'trend');
 
   // Trend tab: curated picks — one from each non-kitchen category
   const TREND_IDS = [

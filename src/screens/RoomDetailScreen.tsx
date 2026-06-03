@@ -3,6 +3,7 @@ import {
   View,
   Text,
   ScrollView,
+  FlatList,
   Image,
   TouchableOpacity,
   StyleSheet,
@@ -16,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MY_ROOMS, ALL_FURNITURE } from '../data';
 import { RoomFurnitureItem, FurnitureItem, ViewMode } from '../types';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface RoomDetailScreenProps {
   roomId: string;
@@ -157,71 +158,37 @@ export const RoomDetailScreen = ({
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero – photo grid: 1 large left / 2 small right */}
+        {/* Hero – full-width photo horizontal scroll */}
         <View style={{ height: HERO_HEIGHT }}>
-          {viewMode === '2d' ? (
-            <View style={styles.photoGrid}>
-              {/* Large photo */}
-              <View style={styles.photoGridLeft}>
-                <Image
-                  source={imgSrc(room.realPhotos[0] ?? room.heroImage)}
-                  style={{ width: '100%', height: '100%' }}
-                  resizeMode="cover"
-                />
-              </View>
-              {/* Two stacked small photos */}
-              <View style={styles.photoGridRight}>
-                <View style={styles.photoGridSmall}>
-                  <Image
-                    source={imgSrc(room.realPhotos[1] ?? room.heroImage)}
-                    style={{ width: '100%', height: '100%' }}
-                    resizeMode="cover"
-                  />
-                </View>
-                <View style={styles.photoGridSmall}>
-                  <Image
-                    source={imgSrc(room.realPhotos[2] ?? room.heroImage)}
-                    style={{ width: '100%', height: '100%' }}
-                    resizeMode="cover"
-                  />
-                </View>
-              </View>
-            </View>
-          ) : (
-            <View style={[StyleSheet.absoluteFillObject, styles.mock3D]}>
-              <View style={styles.mock3DGrid}>
-                {roomFurniture.slice(0, 3).map(item => (
-                  <View key={item.id} style={styles.mock3DItem}>
-                    <Text style={styles.mock3DEmoji}>{item.thumbnail}</Text>
-                  </View>
-                ))}
-              </View>
-              <Text style={styles.mock3DLabel}>3D 뷰</Text>
-            </View>
-          )}
+          <FlatList
+            data={room.realPhotos.length > 0 ? room.realPhotos : [room.heroImage]}
+            keyExtractor={(_, i) => String(i)}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            style={StyleSheet.absoluteFillObject}
+            renderItem={({ item: photo }) => (
+              <Image
+                source={imgSrc(photo)}
+                style={{ width: SCREEN_WIDTH, height: HERO_HEIGHT }}
+                resizeMode="cover"
+              />
+            )}
+          />
           <LinearGradient
-            colors={['rgba(0,0,0,0.15)', 'transparent', 'rgba(251,251,254,1)']}
+            colors={['rgba(0,0,0,0.18)', 'transparent', 'rgba(251,251,254,1)']}
             locations={[0, 0.4, 1]}
             style={StyleSheet.absoluteFillObject}
             pointerEvents="none"
           />
-
-          {/* View mode toggle */}
-          <Animated.View style={[styles.viewToggle, { opacity: heroOpacity }]}>
-            <View style={styles.viewToggleInner}>
-              {(['2d', '3d'] as ViewMode[]).map(mode => (
-                <TouchableOpacity
-                  key={mode}
-                  onPress={() => setViewMode(mode)}
-                  style={[styles.viewToggleBtn, { backgroundColor: viewMode === mode ? 'rgba(255,255,255,0.9)' : 'transparent' }]}
-                >
-                  <Text style={[styles.viewToggleBtnText, { color: viewMode === mode ? '#170F49' : 'rgba(255,255,255,0.6)' }]}>
-                    {mode.toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
+          {/* Photo count dot */}
+          {room.realPhotos.length > 1 && (
+            <View style={styles.photoDots} pointerEvents="none">
+              {room.realPhotos.map((_, i) => (
+                <View key={i} style={[styles.photoDot, i === 0 && styles.photoDotActive]} />
               ))}
             </View>
-          </Animated.View>
+          )}
         </View>
 
         {/* Info sheet */}
@@ -285,7 +252,7 @@ export const RoomDetailScreen = ({
           <View style={styles.divider} />
 
           {/* 2D floor plan */}
-          {viewMode === '2d' && (
+          {(
             <View style={[styles.sheetPadded, { marginBottom: 20 }]}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>평면도 뷰</Text>
@@ -380,15 +347,9 @@ export const RoomDetailScreen = ({
       >
         <TouchableOpacity onPress={onOpenEditor} activeOpacity={0.9} style={styles.ctaBtn}>
           <LinearGradient colors={['#4A3AFF', '#6B5EFF', '#897FFF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.ctaBtnInner}>
-            <View style={styles.ctaBtnLeft}>
-              <View style={styles.ctaBtnIconWrap}>
-                <Feather name="edit-2" size={18} color="#fff" />
-              </View>
-              <Text style={styles.ctaBtnTitle}>편집</Text>
-            </View>
-            <View style={styles.ctaBtnArrow}>
-              <Feather name="chevron-right" size={18} color="#fff" />
-            </View>
+            <Feather name="edit-2" size={15} color="#fff" />
+            <Text style={styles.ctaBtnTitle}>편집</Text>
+            <Feather name="chevron-right" size={14} color="rgba(255,255,255,0.6)" />
           </LinearGradient>
         </TouchableOpacity>
       </LinearGradient>
@@ -472,14 +433,12 @@ export const RoomDetailScreen = ({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FBFBFE' },
-  // ── Photo grid (1 large left + 2 small right) ──────────────────────────────
-  photoGrid: {
-    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-    flexDirection: 'row', gap: 2, backgroundColor: '#111',
+  photoDots: {
+    position: 'absolute', bottom: 14, left: 0, right: 0,
+    flexDirection: 'row', justifyContent: 'center', gap: 5,
   },
-  photoGridLeft: { flex: 3, overflow: 'hidden' },
-  photoGridRight: { flex: 2, flexDirection: 'column', gap: 2 },
-  photoGridSmall: { flex: 1, overflow: 'hidden' },
+  photoDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.45)' },
+  photoDotActive: { backgroundColor: '#fff', width: 16 },
   topBar: {
     position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -569,13 +528,13 @@ const styles = StyleSheet.create({
     position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 20,
     paddingHorizontal: 20, paddingTop: 24,
   },
-  ctaBtn: { borderRadius: 22, overflow: 'hidden', shadowColor: '#4A3AFF', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.38, shadowRadius: 16, elevation: 8 },
-  ctaBtnInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingVertical: 16 },
-  ctaBtnLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  ctaBtnIconWrap: { width: 40, height: 40, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
-  ctaBtnTitle: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  ctaBtn: { borderRadius: 16, overflow: 'hidden', alignSelf: 'center', shadowColor: '#4A3AFF', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.32, shadowRadius: 10, elevation: 6 },
+  ctaBtnInner: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingVertical: 11 },
+  ctaBtnLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  ctaBtnIconWrap: { width: 32, height: 32, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
+  ctaBtnTitle: { color: '#fff', fontWeight: '700', fontSize: 14 },
   ctaBtnSub: { color: 'rgba(255,255,255,0.65)', fontSize: 11 },
-  ctaBtnArrow: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
+  ctaBtnArrow: { width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
   modalOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.40)' },
   bottomSheet: {
     position: 'absolute', bottom: 0, left: 0, right: 0,

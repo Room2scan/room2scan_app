@@ -22,11 +22,12 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface HomeScreenProps {
   rooms?: RoomProject[];
-  onAddRoom:  () => void;            // 치수 입력으로 새 방 만들기
-  onScanRoom?: () => void;           // 카메라 스캔으로 방 추가 (선택적)
+  onAddRoom:  () => void;
+  onScanRoom?: () => void;
   onOpenRoom: (roomId: string) => void;
   onTabChange: (t: MainTab) => void;
   onSnack: (msg: string, icon?: string) => void;
+  onOpenCatalogTrend?: () => void;
 }
 
 export const HomeScreen = ({
@@ -36,6 +37,7 @@ export const HomeScreen = ({
   onOpenRoom,
   onTabChange,
   onSnack,
+  onOpenCatalogTrend,
 }: HomeScreenProps) => {
   const insets = useSafeAreaInsets();
   const [activeBanner, setActiveBanner] = useState(0);
@@ -202,7 +204,7 @@ export const HomeScreen = ({
                 <Feather name="trending-up" size={15} color="#4A3AFF" />
                 <Text style={styles.sectionTitle}>지금 트렌드</Text>
               </View>
-              <TouchableOpacity onPress={() => onTabChange('catalog')} style={styles.seeAll}>
+              <TouchableOpacity onPress={() => onOpenCatalogTrend ? onOpenCatalogTrend() : onTabChange('catalog')} style={styles.seeAll}>
                 <Text style={styles.seeAllText}>전체 보기</Text>
                 <Feather name="chevron-right" size={13} color="#4A3AFF" />
               </TouchableOpacity>

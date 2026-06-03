@@ -3,11 +3,14 @@ import {
   View,
   Text,
   ScrollView,
+  Image,
   TouchableOpacity,
   StyleSheet,
   Animated,
   Dimensions,
 } from 'react-native';
+
+const imgSrc = (src: any) => (typeof src === 'string' ? { uri: src } : src);
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -161,7 +164,15 @@ export const ProductDetailScreen = ({
           {/* Furniture preview */}
           <View style={styles.previewContent}>
             <View style={[styles.furnitureDisplay, { backgroundColor: `${selectedColor}25`, borderColor: `${accentColor}20` }]}>
-              <Text style={styles.furnitureEmoji}>{item.thumbnail}</Text>
+              {item.imageUrl ? (
+                <Image
+                  source={imgSrc(item.imageUrl)}
+                  style={styles.furnitureImage}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Text style={styles.furnitureEmoji}>{item.thumbnail}</Text>
+              )}
             </View>
             {view3DActive && (
               <Animated.View style={[styles.rotateHint, { opacity: heroOpacity }]}>
@@ -404,6 +415,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 16, elevation: 6,
   },
   furnitureEmoji: { fontSize: 80 },
+  furnitureImage: { width: '85%', height: '85%' },
   rotateHint: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999,
