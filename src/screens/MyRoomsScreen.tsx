@@ -15,6 +15,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomNav } from '../components/Shared';
 import { MY_ROOMS } from '../data';
 import { MainTab } from '../types';
+
+const imgSrc = (src: any) => (typeof src === 'string' ? { uri: src } : src);
 import { loadAllCustomRooms, CustomRoom } from '../utils/roomStorage';
 
 // ─── Room-type display metadata ───────────────────────────────────────────────
@@ -145,16 +147,16 @@ const StaticRoomCard = ({
         )}
       </View>
       <View style={styles.realPhotosCol}>
-        {room.realPhotos.map((photo, pi) => (
-          <View key={pi} style={styles.realPhotoWrap}>
+        {room.realPhotos.slice(1, 3).map((photo, pi) => (
+          <View key={pi} style={[styles.realPhotoWrap, pi === 0 && { marginBottom: 2 }]}>
             <Image
-              source={{ uri: photo }}
+              source={imgSrc(photo)}
               style={StyleSheet.absoluteFillObject}
               resizeMode="cover"
             />
-            {pi === room.realPhotos.length - 1 && (
+            {pi === 1 && (
               <View style={styles.realPhotoOverlay}>
-                <Text style={styles.realPhotoText}>실제 사진</Text>
+                <Text style={styles.realPhotoText}>+{room.realPhotos.length - 2}</Text>
               </View>
             )}
           </View>

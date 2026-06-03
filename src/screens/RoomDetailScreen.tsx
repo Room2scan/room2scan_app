@@ -163,15 +163,27 @@ export const RoomDetailScreen = ({
             <View style={styles.photoGrid}>
               {/* Large photo */}
               <View style={styles.photoGridLeft}>
-                <Image source={imgSrc(room.realPhotos[0] ?? room.heroImage)} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+                <Image
+                  source={imgSrc(room.realPhotos[0] ?? room.heroImage)}
+                  style={{ width: '100%', height: '100%' }}
+                  resizeMode="cover"
+                />
               </View>
               {/* Two stacked small photos */}
               <View style={styles.photoGridRight}>
                 <View style={styles.photoGridSmall}>
-                  <Image source={imgSrc(room.realPhotos[1] ?? room.heroImage)} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+                  <Image
+                    source={imgSrc(room.realPhotos[1] ?? room.heroImage)}
+                    style={{ width: '100%', height: '100%' }}
+                    resizeMode="cover"
+                  />
                 </View>
-                <View style={[styles.photoGridSmall, { marginTop: 2 }]}>
-                  <Image source={imgSrc(room.realPhotos[2] ?? room.heroImage)} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+                <View style={styles.photoGridSmall}>
+                  <Image
+                    source={imgSrc(room.realPhotos[2] ?? room.heroImage)}
+                    style={{ width: '100%', height: '100%' }}
+                    resizeMode="cover"
+                  />
                 </View>
               </View>
             </View>
@@ -461,10 +473,13 @@ export const RoomDetailScreen = ({
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FBFBFE' },
   // ── Photo grid (1 large left + 2 small right) ──────────────────────────────
-  photoGrid: { flex: 1, flexDirection: 'row', gap: 2, backgroundColor: '#000' },
-  photoGridLeft: { flex: 3, overflow: 'hidden', position: 'relative' },
-  photoGridRight: { flex: 2, flexDirection: 'column', gap: 0 },
-  photoGridSmall: { flex: 1, overflow: 'hidden', position: 'relative' },
+  photoGrid: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    flexDirection: 'row', gap: 2, backgroundColor: '#111',
+  },
+  photoGridLeft: { flex: 3, overflow: 'hidden' },
+  photoGridRight: { flex: 2, flexDirection: 'column', gap: 2 },
+  photoGridSmall: { flex: 1, overflow: 'hidden' },
   topBar: {
     position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
