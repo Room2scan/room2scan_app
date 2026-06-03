@@ -291,7 +291,7 @@ export const MyRoomsScreen = ({
       {/* FAB */}
       <View style={styles.fabContainer}>
         <TouchableOpacity onPress={() => setShowAddModal(true)} activeOpacity={0.88} style={styles.fab}>
-          <Feather name="plus" size={20} color="#fff" />
+          <Feather name="plus" size={15} color="#fff" />
           <Text style={styles.fabText}>새 방 추가하기</Text>
         </TouchableOpacity>
       </View>
@@ -466,13 +466,13 @@ const styles = StyleSheet.create({
     alignItems: 'center', zIndex: 30,
   },
   fab: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: '#4A3AFF', borderRadius: 22,
-    paddingHorizontal: 24, paddingVertical: 16,
-    shadowColor: '#4A3AFF', shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.38, shadowRadius: 14, elevation: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 7,
+    backgroundColor: '#4A3AFF', borderRadius: 18,
+    paddingHorizontal: 16, paddingVertical: 10,
+    shadowColor: '#4A3AFF', shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.32, shadowRadius: 10, elevation: 6,
   },
-  fabText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  fabText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 
   // 새 방 추가 모달
   modalOverlay: {
