@@ -10,6 +10,7 @@ export interface FurnitureItem {
   dimensions: string;
   price: string;
   thumbnail: string;
+  imageUrl?: string;   // optional product photo URL
   color: string;
   isWishlisted: boolean;
   rating: number;

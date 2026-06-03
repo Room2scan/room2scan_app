@@ -5,13 +5,24 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Animated,
+  Image,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomNav } from '../components/Shared';
-import { Furniture3DPreview } from '../components/Furniture3DPreview';
 import { ProductDetailScreen } from './ProductDetailScreen';
+
+// Unsplash 가구 카테고리별 대표 사진
+const FURNITURE_PHOTOS: Record<string, string> = {
+  Sofa:        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop&auto=format',
+  Chair:       'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400&h=400&fit=crop&auto=format',
+  Table:       'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=400&h=400&fit=crop&auto=format',
+  Shelf:       'https://images.unsplash.com/photo-1594620302200-9a762244a156?w=400&h=400&fit=crop&auto=format',
+  Kitchen:     'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop&auto=format',
+  Electronics: 'https://images.unsplash.com/photo-1593359677879-a4bb92f4280e?w=400&h=400&fit=crop&auto=format',
+  Decor:       'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop&auto=format',
+  Other:       'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop&auto=format',
+};
 import { ALL_FURNITURE, CATEGORY_TABS } from '../data';
 import { MainTab, FurnitureItem, CatalogCategory } from '../types';
 
@@ -181,14 +192,14 @@ const CatalogList = ({
                 style={styles.card}
               >
                 <View style={styles.cardImageWrap}>
-                  <View style={[styles.cardImage, { backgroundColor: `${item.color}18` }]}>
+                  <View style={styles.cardImage}>
                     {item.isMyFurniture ? (
                       <Text style={styles.cardEmoji}>{item.thumbnail}</Text>
                     ) : (
-                      <Furniture3DPreview
-                        color={item.color}
-                        emoji={item.thumbnail}
-                        size={72}
+                      <Image
+                        source={{ uri: item.imageUrl ?? FURNITURE_PHOTOS[item.type] ?? FURNITURE_PHOTOS.Decor }}
+                        style={styles.cardPhoto}
+                        resizeMode="cover"
                       />
                     )}
                   </View>
@@ -273,7 +284,8 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 1,
   },
   cardImageWrap: { position: 'relative' },
-  cardImage: { width: '100%', aspectRatio: 1, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  cardImage: { width: '100%', aspectRatio: 1, borderRadius: 14, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F1F2F9' },
+  cardPhoto: { width: '100%', height: '100%' },
   cardEmoji: { fontSize: 36 },
   wishlistBtn: {
     position: 'absolute', top: 8, right: 8, width: 28, height: 28,
