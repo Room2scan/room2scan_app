@@ -179,7 +179,7 @@ export const HomeScreen = ({
               {rooms.map(room => (
                 <TouchableOpacity key={room.id} onPress={() => onOpenRoom(room.id)} activeOpacity={0.85} style={styles.roomCard}>
                   <View style={styles.roomCardImage}>
-                    <Image source={typeof room.heroImage === 'string' ? { uri: room.heroImage } : room.heroImage} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+                    <Image source={typeof room.heroImage === 'string' ? { uri: room.heroImage } : room.heroImage} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <LinearGradient colors={['transparent', 'rgba(0,0,0,0.5)']} style={StyleSheet.absoluteFillObject} />
                     {room.isFeatured && (
                       <View style={styles.featuredBadge}>
@@ -217,8 +217,16 @@ export const HomeScreen = ({
                   activeOpacity={0.85}
                   style={styles.furnitureCard}
                 >
-                  <View style={[styles.furnitureThumbnail, { backgroundColor: `${item.color}30` }]}>
-                    <Text style={styles.furnitureEmoji}>{item.thumbnail}</Text>
+                  <View style={[styles.furnitureThumbnail, { backgroundColor: `${item.color}20` }]}>
+                    {item.imageUrl ? (
+                      <Image
+                        source={typeof item.imageUrl === 'string' ? { uri: item.imageUrl } : item.imageUrl}
+                        style={{ width: '100%', height: '100%', borderRadius: 14 }}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <Text style={styles.furnitureEmoji}>{item.thumbnail}</Text>
+                    )}
                   </View>
                   <View>
                     <Text style={styles.furnitureName} numberOfLines={1}>{item.name}</Text>
@@ -340,7 +348,7 @@ const styles = StyleSheet.create({
   addRoomTitle: { fontSize: 12, fontWeight: '700', color: '#170F49' },
   addRoomSub: { fontSize: 10, color: '#A0A3BD', marginTop: 2 },
   roomCard: { width: 144, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.60)', flexShrink: 0, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
-  roomCardImage: { width: '100%', height: 80, position: 'relative', overflow: 'hidden' },
+  roomCardImage: { width: '100%', aspectRatio: 1, backgroundColor: '#F1F2F9', position: 'relative', overflow: 'hidden' },
   featuredBadge: { position: 'absolute', top: 6, left: 6, flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: '#4A3AFF', borderRadius: 999, paddingHorizontal: 6, paddingVertical: 2 },
   featuredText: { color: '#fff', fontSize: 8, fontWeight: '700' },
   roomCardBody: { padding: 10, backgroundColor: '#fff' },

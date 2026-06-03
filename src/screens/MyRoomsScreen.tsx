@@ -132,7 +132,7 @@ const StaticRoomCard = ({
       <View style={styles.heroImageWrap}>
         <Image
           source={typeof room.heroImage === 'string' ? { uri: room.heroImage } : room.heroImage}
-          style={StyleSheet.absoluteFillObject}
+          style={{ width: '100%', height: '100%' }}
           resizeMode="cover"
         />
         <View style={styles.badge3D}>
@@ -151,7 +151,7 @@ const StaticRoomCard = ({
           <View key={pi} style={[styles.realPhotoWrap, pi === 0 && { marginBottom: 2 }]}>
             <Image
               source={imgSrc(photo)}
-              style={StyleSheet.absoluteFillObject}
+              style={{ width: '100%', height: '100%' }}
               resizeMode="cover"
             />
             {pi === 1 && (
@@ -414,8 +414,10 @@ const styles = StyleSheet.create({
   },
 
   // ── Static room card ──────────────────────────────────────────────
-  imagesRow: { flexDirection: 'row', height: 176, gap: 2 },
-  heroImageWrap: { flex: 1, position: 'relative', overflow: 'hidden' },
+  // aspectRatio: (1/1) for square photos. Left col = 62% width × full height
+  // Right col = 38% width × 2 stacked halves. Height driven by left col 1:1 ratio.
+  imagesRow: { flexDirection: 'row', gap: 2 },
+  heroImageWrap: { flex: 62, aspectRatio: 0.9, backgroundColor: '#F1F2F9', overflow: 'hidden' },
   featuredBadge: {
     position: 'absolute', top: 8, left: 8,
     flexDirection: 'row', alignItems: 'center', gap: 2,
@@ -423,8 +425,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8, paddingVertical: 2,
   },
   featuredText: { color: '#fff', fontSize: 9, fontWeight: '700' },
-  realPhotosCol: { width: '34%', gap: 2 },
-  realPhotoWrap: { flex: 1, position: 'relative', overflow: 'hidden' },
+  realPhotosCol: { flex: 38, gap: 2 },
+  realPhotoWrap: { flex: 1, backgroundColor: '#F1F2F9', overflow: 'hidden' },
   realPhotoOverlay: {
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.28)',
