@@ -13,6 +13,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -181,6 +182,8 @@ export const UnityEditorScreen = ({
   const [viewMode,    setViewMode]    = useState<'2D' | '3D'>('3D');
   const [snapEnabled, setSnapEnabled] = useState(false);
   const [selectedTool, setSelectedTool] = useState<EditorToolId>('select');
+  const [roomDisplayName, setRoomDisplayName] = useState(roomId ?? 'room');
+  const [editingRoomName, setEditingRoomName] = useState(false);
 
   // ── Per-object state (updated from Unity events) ──────────────────────────
   const [objectTransforms, setObjectTransforms] =
@@ -910,7 +913,7 @@ export const UnityEditorScreen = ({
 
   // Derived overlay positions
   const toolbarTop   = (SNAP[1] - HEADER_H) / 2 - 108 + 8;
-  const minimapBottom = SH - SNAP[1] + 12;
+  
 
   // ─────────────────────────────────────────────────────────────────────────
   // Tab content renderers
@@ -1396,19 +1399,6 @@ export const UnityEditorScreen = ({
             );
           })}
         </View>
-
-        {/* Minimap */}
-        <View style={[s.minimap, { bottom: minimapBottom }]} pointerEvents="none">
-          <View style={s.minimapInner}>
-            <View style={s.minimapBorder}>
-              <View style={[s.minimapObj, { top: 4, left: 4, width: 10, height: 10 }]} />
-              <View style={[s.minimapObj, { bottom: 4, right: 4, width: 14, height: 7 }]} />
-              {selectedInstanceId && (
-                <View style={[s.minimapSelected, { left: 16, top: 14, width: 16, height: 16 }]} />
-              )}
-            </View>
-          </View>
-        </View>
       </View>
 
       {/* Header — solid white, z=30 */}
@@ -1418,10 +1408,23 @@ export const UnityEditorScreen = ({
         </TouchableOpacity>
         <View style={s.headerCenter}>
           <Text style={s.headerTitle}>룸 편집</Text>
-          <View style={s.headerSubRow}>
-            <Text style={s.headerSubText}>replica_room_0</Text>
-            <Feather name="edit-2" size={10} color={N400} />
-          </View>
+          {editingRoomName ? (
+            <TextInput
+              style={s.headerSubInput}
+              value={roomDisplayName}
+              onChangeText={setRoomDisplayName}
+              onBlur={() => setEditingRoomName(false)}
+              onSubmitEditing={() => setEditingRoomName(false)}
+              autoFocus
+              selectTextOnFocus
+              returnKeyType="done"
+            />
+          ) : (
+            <TouchableOpacity style={s.headerSubRow} onPress={() => setEditingRoomName(true)} activeOpacity={0.7}>
+              <Text style={s.headerSubText}>{roomDisplayName}</Text>
+              <Feather name="edit-2" size={10} color={N400} />
+            </TouchableOpacity>
+          )}
         </View>
         <TouchableOpacity
           style={s.headerSaveBtn} activeOpacity={0.75}
@@ -1624,6 +1627,7 @@ const s = StyleSheet.create({
   headerTitle:   { fontSize: 15, fontWeight: '600', color: N900 },
   headerSubRow:  { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   headerSubText: { fontSize: 10, color: N500 },
+  headerSubInput: { fontSize: 10, color: N700, borderBottomWidth: 1, borderBottomColor: PRIMARY, marginTop: 2, minWidth: 80, padding: 0 },
   headerSaveBtn: { width: 36, height: 44, alignItems: 'center', justifyContent: 'center' },
 
   vpTopRow: {

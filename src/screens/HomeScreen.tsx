@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  PanResponder,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
@@ -37,6 +38,7 @@ export const HomeScreen = ({
   const insets = useSafeAreaInsets();
   const [activeBanner, setActiveBanner] = useState(0);
   const scrollY = useRef(new Animated.Value(0)).current;
+  const bannerSwipeX = useRef(new Animated.Value(0)).current;
 
   const BANNER_HEIGHT = Math.round(SCREEN_HEIGHT * 0.52);
   const SHEET_OVERLAP = 28;
@@ -47,6 +49,23 @@ export const HomeScreen = ({
     const t = setInterval(() => setActiveBanner(prev => (prev + 1) % HERO_BANNERS.length), 5500);
     return () => clearInterval(t);
   }, []);
+
+  const bannerPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 10 && Math.abs(g.dx) > Math.abs(g.dy),
+      onPanResponderGrant: () => bannerSwipeX.setValue(0),
+      onPanResponderMove: (_, g) => bannerSwipeX.setValue(g.dx),
+      onPanResponderRelease: (_, g) => {
+        if (g.dx < -40) {
+          setActiveBanner(prev => (prev + 1) % HERO_BANNERS.length);
+        } else if (g.dx > 40) {
+          setActiveBanner(prev => (prev - 1 + HERO_BANNERS.length) % HERO_BANNERS.length);
+        }
+        Animated.spring(bannerSwipeX, { toValue: 0, useNativeDriver: true }).start();
+      },
+    })
+  ).current;
 
   const bannerHeight = scrollY.interpolate({ inputRange: [0, MAX_SCROLL], outputRange: [BANNER_HEIGHT, MIN_BANNER + SHEET_OVERLAP], extrapolate: 'clamp' });
   const bannerOpacity = scrollY.interpolate({ inputRange: [0, MAX_SCROLL * 0.625], outputRange: [1, 0], extrapolate: 'clamp' });
@@ -71,13 +90,20 @@ export const HomeScreen = ({
             <Feather name="bell" size={16} color="#514F6E" />
           </TouchableOpacity>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>박</Text>
+            <Image
+              source={require('../../assets/profile.png')}
+              style={styles.avatarImage}
+              resizeMode="cover"
+            />
           </View>
         </View>
       </View>
 
       {/* Hero banner */}
-      <Animated.View style={[styles.heroBanner, { height: bannerHeight, transform: [{ scale: bannerScale }] }]}>
+      <Animated.View
+        style={[styles.heroBanner, { height: bannerHeight, transform: [{ scale: bannerScale }, { translateX: bannerSwipeX }] }]}
+        {...bannerPanResponder.panHandlers}
+      >
         {HERO_BANNERS.map((banner, idx) => (
           <Animated.View
             key={banner.id}
@@ -251,9 +277,12 @@ const styles = StyleSheet.create({
   },
   avatar: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#4A3AFF', alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#897FFF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 6, elevation: 4,
+    backgroundColor: '#E9EAF0',
+    borderWidth: 2, borderColor: '#4A3AFF',
+    overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5,
   },
+  avatarImage: { width: '100%', height: '100%' },
   avatarText: { color: '#fff', fontSize: 12, fontWeight: '700' },
   heroBanner: {
     position: 'absolute', top: 0, left: 0, right: 0,
@@ -273,7 +302,7 @@ const styles = StyleSheet.create({
   bannerTagText: { color: '#fff', fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
   bannerHeadline: { color: '#fff', fontSize: 24, fontWeight: '700', lineHeight: 30, marginBottom: 6 },
   bannerSubtext: { color: 'rgba(255,255,255,0.80)', fontSize: 12, lineHeight: 18, maxWidth: 280 },
-  bannerDots: { position: 'absolute', bottom: 16, right: 20, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  bannerDots: { position: 'absolute', bottom: 52, right: 20, flexDirection: 'row', alignItems: 'center', gap: 6 },
   dot: { borderRadius: 999, height: 6 },
   dotActive: { width: 20, backgroundColor: '#fff' },
   dotInactive: { width: 6, backgroundColor: 'rgba(255,255,255,0.40)' },
