@@ -1,7 +1,14 @@
 package com.scan2room.app
 
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.WindowManager
+
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
@@ -17,6 +24,22 @@ class MainActivity : ReactActivity() {
     // This is required for expo-splash-screen.
     setTheme(R.style.AppTheme);
     super.onCreate(null)
+
+    // Edge-to-edge: let app draw behind system bars
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+
+    val controller = WindowInsetsControllerCompat(window, window.decorView)
+
+    // Hide navigation bar; reappears on swipe (transient)
+    controller.hide(WindowInsetsCompat.Type.navigationBars())
+    controller.systemBarsBehavior =
+        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+    // Transparent bars so content shows through if user swipes them in
+    window.navigationBarColor = Color.TRANSPARENT
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      window.isNavigationBarContrastEnforced = false
+    }
   }
 
   /**
