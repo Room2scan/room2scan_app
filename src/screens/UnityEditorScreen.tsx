@@ -94,6 +94,14 @@ type TransformState = {
   scale:        number;
 };
 
+type RoomBoundsState = {
+  min: { x: number; y: number; z: number };
+  max: { x: number; y: number; z: number };
+};
+
+const ADD_SPAWN_OFFSET = 0.7;
+const ADD_ITEM_HALF_EXTENT = 0.42;
+
 // ─── Unity loader ─────────────────────────────────────────────────────────────
 const tryLoadUnityView = (): any | null => {
   try {
@@ -177,6 +185,7 @@ export const UnityEditorScreen = ({
 
   // ── Custom (procedural) room spec — loaded from AsyncStorage for re-entry ──
   const [customRoomSpec, setCustomRoomSpec] = useState<ProceduralRoomOptions | null>(null);
+  const [currentRoomBounds, setCurrentRoomBounds] = useState<RoomBoundsState | null>(null);
 
   // ── Editor-mode state (mirrored in Unity) ─────────────────────────────────
   const [viewMode,    setViewMode]    = useState<'2D' | '3D'>('3D');
@@ -271,6 +280,8 @@ export const UnityEditorScreen = ({
       case 'RoomLoaded': {
         // Unity confirmed the room loaded — cancel fallback timer, reveal 3-D view.
         if (payload.success) {
+          const nextBounds = normalizeRoomBounds(payload.bounds);
+          if (nextBounds) setCurrentRoomBounds(nextBounds);
           if (!payload.simulated) {
             setUnityConnected(true);
             pendingLoadRoomCmd.current = null;
@@ -472,19 +483,29 @@ export const UnityEditorScreen = ({
   const simulateUnityResponse = (cmd: UnityBridgeEnvelope) => {
     switch (cmd.name) {
       case 'LoadRoom':
+        const loadBounds = (cmd.payload as any)?.room?.bounds ?? LOCAL_ROOM1_BOUNDS;
         receiveFromUnity(serializeBridgeMessage(
-          createMockUnityEvent(cmd.requestId, 'RoomLoaded', { roomId: 'replica_room0', success: true, simulated: true })
+          createMockUnityEvent(cmd.requestId, 'RoomLoaded', {
+            roomId: 'replica_room0',
+            success: true,
+            simulated: true,
+            bounds: loadBounds,
+          })
         ));
         break;
 
       case 'CreateProceduralRoom': {
         // Simulate the two events Unity would send back
         const p = cmd.payload as any;
+        const bounds = {
+          min: { x: -p.width / 2, y: 0, z: -p.length / 2 },
+          max: { x:  p.width / 2, y: p.height, z:  p.length / 2 },
+        };
         receiveFromUnity(serializeBridgeMessage(
-          createMockUnityEvent(cmd.requestId, 'ProceduralRoomCreated', { roomId: p.roomId, success: true })
+          createMockUnityEvent(cmd.requestId, 'ProceduralRoomCreated', { roomId: p.roomId, success: true, bounds })
         ));
         receiveFromUnity(serializeBridgeMessage(
-          createMockUnityEvent(cmd.requestId, 'RoomLoaded', { roomId: p.roomId, success: true, simulated: true })
+          createMockUnityEvent(cmd.requestId, 'RoomLoaded', { roomId: p.roomId, success: true, simulated: true, bounds })
         ));
         break;
       }
@@ -716,11 +737,77 @@ export const UnityEditorScreen = ({
     });
   };
 
+  const normalizeRoomBounds = (bounds: any): RoomBoundsState | null => {
+    const min = bounds?.min;
+    const max = bounds?.max;
+    const valid =
+      Number.isFinite(min?.x) && Number.isFinite(min?.y) && Number.isFinite(min?.z) &&
+      Number.isFinite(max?.x) && Number.isFinite(max?.y) && Number.isFinite(max?.z);
+    return valid ? { min, max } : null;
+  };
+
+  const getRoomBoundsForSpawn = (): RoomBoundsState | null => {
+    if (currentRoomBounds) return currentRoomBounds;
+    const room = roomId ? MY_ROOMS.find(r => r.id === roomId) : MY_ROOMS[0];
+    return room?.deliveryManifestPath ? LOCAL_ROOM1_BOUNDS : null;
+  };
+
+  const clampSpawnPosition = (
+    pos: TransformState['position'],
+    bounds: RoomBoundsState | null
+  ): TransformState['position'] => {
+    if (!bounds) return pos;
+
+    const clampAxis = (value: number, min: number, max: number) => {
+      if (min > max) return (min + max) / 2;
+      return Math.max(min, Math.min(max, value));
+    };
+
+    return {
+      x: clampAxis(pos.x, bounds.min.x + ADD_ITEM_HALF_EXTENT, bounds.max.x - ADD_ITEM_HALF_EXTENT),
+      y: Math.max(bounds.min.y, pos.y),
+      z: clampAxis(pos.z, bounds.min.z + ADD_ITEM_HALF_EXTENT, bounds.max.z - ADD_ITEM_HALF_EXTENT),
+    };
+  };
+
+  const getAddFurnitureSpawnPosition = (): TransformState['position'] => {
+    const bounds = getRoomBoundsForSpawn();
+    const selected = selectedInstanceId ? objectTransforms[selectedInstanceId]?.position : null;
+
+    if (selected) {
+      const candidates = [
+        { x: selected.x + ADD_SPAWN_OFFSET, y: selected.y, z: selected.z + ADD_SPAWN_OFFSET },
+        { x: selected.x - ADD_SPAWN_OFFSET, y: selected.y, z: selected.z + ADD_SPAWN_OFFSET },
+        { x: selected.x + ADD_SPAWN_OFFSET, y: selected.y, z: selected.z - ADD_SPAWN_OFFSET },
+        { x: selected.x - ADD_SPAWN_OFFSET, y: selected.y, z: selected.z - ADD_SPAWN_OFFSET },
+      ];
+
+      if (bounds) {
+        const fits = (p: TransformState['position']) =>
+          p.x >= bounds.min.x + ADD_ITEM_HALF_EXTENT &&
+          p.x <= bounds.max.x - ADD_ITEM_HALF_EXTENT &&
+          p.z >= bounds.min.z + ADD_ITEM_HALF_EXTENT &&
+          p.z <= bounds.max.z - ADD_ITEM_HALF_EXTENT;
+        return clampSpawnPosition(candidates.find(fits) ?? candidates[0], bounds);
+      }
+
+      return candidates[0];
+    }
+
+    if (bounds) {
+      return {
+        x: (bounds.min.x + bounds.max.x) / 2,
+        y: Math.max(0, bounds.min.y),
+        z: (bounds.min.z + bounds.max.z) / 2,
+      };
+    }
+
+    return { x: 0, y: 0, z: 0 };
+  };
+
   const handleAddFurniture = (catalogId = selectedCatalogId) => {
     const id  = nextInstanceId();
-    const x   = (Math.random() - 0.5) * 4;
-    const z   = (Math.random() - 0.5) * 4;
-    const pos = { x, y: 0, z };
+    const pos = getAddFurnitureSpawnPosition();
     // Optimistic: track locally before Unity confirms
     setAddedInstanceIds(prev => [...prev, id]);
     setObjectCatalogIds(prev => ({ ...prev, [id]: catalogId }));
@@ -729,7 +816,7 @@ export const UnityEditorScreen = ({
       [id]: { position: pos, rotationYDeg: 0, scale: 0.8 },
     }));
     setSelectedInstanceId(id);
-    sendToUnity(createAddFurniturePayload(id, catalogId, pos));
+    sendToUnity(createAddFurniturePayload(id, catalogId, pos, true));
     setActiveTab('object');
     setShowObjectDetail(true);
     snapTo(1);
@@ -822,6 +909,7 @@ export const UnityEditorScreen = ({
     furnitureCounter = 0;
     layoutRestoredRef.current = false;
     setUnityConnected(false);
+    setCurrentRoomBounds(null);
     setTimeout(() => sendToUnity(reloadCommand), 100);
   };
 

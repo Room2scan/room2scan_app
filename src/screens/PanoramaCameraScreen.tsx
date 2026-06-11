@@ -8,6 +8,7 @@ import {
   Easing,
   Modal,
   ScrollView,
+  useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
@@ -42,12 +43,15 @@ const MODE_LABELS: Record<CameraMode, { title: string; instruction: string; subI
   furniture: { title: '가구 스캔', instruction: '가구 주변을 천천히 돌며 촬영하세요', subInstruction: '360° 전체가 포착되도록' },
 };
 
+const ROOM_SCAN_PANORAMA = require('../../assets/rooms/demo_scan_panorama.png');
+
 export const PanoramaCameraScreen = ({
   onProcess,
   onBack,
   mode = 'room',
 }: PanoramaCameraScreenProps) => {
   const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const [scanPhase, setScanPhase] = useState<ScanPhase>('idle');
   const [progress, setProgress] = useState(0);
   const [capturedFrames, setCapturedFrames] = useState(0);
@@ -58,12 +62,23 @@ export const PanoramaCameraScreen = ({
   const progressAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const warningOpacity = useRef(new Animated.Value(0)).current;
+  const panoramaPanAnim = useRef(new Animated.Value(0.18)).current;
 
   const modeConfig = MODE_LABELS[mode];
+  const useDemoPanorama = mode === 'room';
+  const panoramaHeight = screenHeight * 1.08;
+  const panoramaWidth = panoramaHeight * 2;
+  const panoramaMaxPan = Math.max(0, panoramaWidth - screenWidth);
+  const panoramaTranslateX = panoramaPanAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -panoramaMaxPan],
+    extrapolate: 'clamp',
+  });
+  const panoramaTranslateY = -(panoramaHeight - screenHeight) * 0.5;
 
   // ── Camera permissions ──────────────────────────────────────────────────
   const [permission, requestPermission] = useCameraPermissions();
-  const cameraReady = permission?.granted ?? false;
+  const cameraReady = useDemoPanorama || (permission?.granted ?? false);
 
   // Pulse animation for scan button
   useEffect(() => {
@@ -78,6 +93,26 @@ export const PanoramaCameraScreen = ({
       pulseAnim.setValue(1);
     }
   }, [scanPhase]);
+
+  useEffect(() => {
+    if (!useDemoPanorama) return;
+
+    panoramaPanAnim.stopAnimation();
+    if (scanPhase === 'scanning') {
+      panoramaPanAnim.setValue(0);
+      Animated.timing(panoramaPanAnim, {
+        toValue: 1,
+        duration: 15000,
+        easing: Easing.inOut(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+      return;
+    }
+
+    if (scanPhase === 'idle') {
+      panoramaPanAnim.setValue(0.22);
+    }
+  }, [panoramaPanAnim, scanPhase, useDemoPanorama]);
 
   // Progress simulation
   useEffect(() => {
@@ -156,13 +191,13 @@ export const PanoramaCameraScreen = ({
   const progressBarWidth = progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] });
 
   // ── Permission gate ─────────────────────────────────────────────────────
-  if (!permission) {
+  if (!useDemoPanorama && !permission) {
     // Loading permissions
     return <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
       <Text style={{ color: '#fff' }}>카메라 권한 확인 중...</Text>
     </View>;
   }
-  if (!permission.granted) {
+  if (!useDemoPanorama && permission?.granted !== true) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }]}>
         <Feather name="camera-off" size={48} color="#fff" style={{ marginBottom: 20 }} />
@@ -187,7 +222,30 @@ export const PanoramaCameraScreen = ({
     <View style={styles.container}>
       {/* Real camera viewfinder (expo-camera) */}
       <View style={styles.viewfinder}>
-        {cameraReady ? (
+        {useDemoPanorama ? (
+          <>
+            <Animated.Image
+              source={ROOM_SCAN_PANORAMA}
+              style={[
+                styles.demoPanoramaImage,
+                {
+                  width: panoramaWidth,
+                  height: panoramaHeight,
+                  transform: [
+                    { translateX: panoramaTranslateX },
+                    { translateY: panoramaTranslateY },
+                  ],
+                },
+              ]}
+              resizeMode="stretch"
+            />
+            <LinearGradient
+              colors={['rgba(0,0,0,0.08)', 'rgba(6,5,16,0.30)', 'rgba(6,5,16,0.62)']}
+              locations={[0, 0.55, 1]}
+              style={StyleSheet.absoluteFillObject}
+            />
+          </>
+        ) : cameraReady ? (
           <CameraView
             style={StyleSheet.absoluteFillObject}
             facing={'back' as CameraType}
@@ -199,7 +257,7 @@ export const PanoramaCameraScreen = ({
           />
         )}
         {/* Ambient glow overlay (semi-transparent so camera shows through) */}
-        {!cameraReady && <View style={styles.ambientGlow} />}
+        {!cameraReady && !useDemoPanorama && <View style={styles.ambientGlow} />}
         {/* Grid overlay */}
         {scanPhase === 'scanning' && (
           <View style={[StyleSheet.absoluteFillObject, styles.gridOverlay]} pointerEvents="none">
@@ -380,6 +438,7 @@ export const PanoramaCameraScreen = ({
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#060510' },
   viewfinder: { ...StyleSheet.absoluteFillObject },
+  demoPanoramaImage: { position: 'absolute', left: 0, top: 0 },
   ambientGlow: {
     position: 'absolute', top: '20%', left: '10%', right: '10%', height: '40%',
     borderRadius: 999,

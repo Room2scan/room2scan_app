@@ -193,8 +193,14 @@ export const createSaveLayoutPayload = () =>
 export const createAddFurniturePayload = (
   instanceId: string,
   catalogId:  string,
-  position:   Vec3 = { x: 0, y: 0, z: 0 }
-) => createBridgeCommand('AddFurniture', { instanceId, catalogId, position });
+  position?:  Vec3,
+  selectAfterAdd = false
+) => createBridgeCommand('AddFurniture', {
+  instanceId,
+  catalogId,
+  ...(position ? { position } : {}),
+  selectAfterAdd,
+});
 
 /** SelectFurniture — select/highlight an existing item */
 export const createSelectFurniturePayload = (instanceId: string) =>
